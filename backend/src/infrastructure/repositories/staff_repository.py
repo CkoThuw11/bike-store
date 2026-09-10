@@ -58,9 +58,7 @@ class StaffRepository(IStaffRepository):
 
     async def get_staff_by_email(self, email: str) -> Staff | None:
         """Return the staff member with the given email, or None."""
-        result = await self._session.execute(
-            select(StaffModel).where(StaffModel.email == email)
-        )
+        result = await self._session.execute(select(StaffModel).where(StaffModel.email == email))
         model = result.scalar_one_or_none()
         return self._to_entity(model) if model else None
 
@@ -82,9 +80,7 @@ class StaffRepository(IStaffRepository):
 
     async def list_all(self, skip: int = 0, limit: int = 100) -> list[Staff]:
         """Return a paginated list of all staff members."""
-        result = await self._session.execute(
-            select(StaffModel).offset(skip).limit(limit)
-        )
+        result = await self._session.execute(select(StaffModel).offset(skip).limit(limit))
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def update(self, staff: Staff) -> Staff:
@@ -111,7 +107,7 @@ class StaffRepository(IStaffRepository):
             select(StaffModel).where(StaffModel.staff_id == staff_id)
         )
         model = result.scalar_one_or_none()
-        if model: 
+        if model:
             await self._session.delete(model)
             await self._session.flush()
             return True

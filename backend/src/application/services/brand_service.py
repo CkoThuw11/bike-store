@@ -12,6 +12,7 @@ from src.domain.exceptions import (
 )
 from src.domain.repositories.brand_repository import IBrandRepository
 
+
 class BrandService:
     """Orchestrates all business logic related to brands."""
 
@@ -22,7 +23,7 @@ class BrandService:
         """Create a new brand, enforcing uniqueness on brand_name."""
         if await self._brand_repo.get_brand_by_name(command.brand_name):
             raise EntityAlreadyExistsException("Brand", command.brand_name)
-        brand = Brand(brand_name = command.brand_name)
+        brand = Brand(brand_name=command.brand_name)
         created_brand = await self._brand_repo.create(brand)
         return BrandDto.model_validate(created_brand)
 
@@ -62,9 +63,12 @@ class BrandService:
         if not brand:
             raise EntityNotFoundError("Brand", brand_id)
 
-        if command.brand_name and command.brand_name != brand.brand_name:
-            if await self._brand_repo.get_brand_by_name(command.brand_name):
-                raise EntityAlreadyExistsException("Brand", command.brand_name)
+        if (
+            command.brand_name
+            and command.brand_name != brand.brand_name
+            and await self._brand_repo.get_brand_by_name(command.brand_name)
+        ):
+            raise EntityAlreadyExistsException("Brand", command.brand_name)
 
         brand.update_information(brand_name=command.brand_name)
         updated = await self._brand_repo.update(brand)

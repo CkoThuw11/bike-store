@@ -1,6 +1,5 @@
 import structlog
-
-from fastapi import Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -15,35 +14,30 @@ logger = structlog.get_logger(__name__)
 ERROR_CODE_TO_HTTP = {
     # Validation
     "VALIDATION_ERROR": status.HTTP_400_BAD_REQUEST,
-
     # Business
     "BUSINESS_RULE_VIOLATION": status.HTTP_422_UNPROCESSABLE_ENTITY,
-
     # Entity
     "ENTITY_NOT_FOUND": status.HTTP_404_NOT_FOUND,
     "ENTITY_ALREADY_EXISTS": status.HTTP_409_CONFLICT,
-
     # Auth
     "INVALID_CREDENTIALS": status.HTTP_401_UNAUTHORIZED,
     "ACCOUNT_INACTIVE": status.HTTP_403_FORBIDDEN,
     "EMAIL_ALREADY_EXISTS": status.HTTP_409_CONFLICT,
     "FORBIDDEN": status.HTTP_403_FORBIDDEN,
-
     # Token
     "TOKEN_MISSING": status.HTTP_401_UNAUTHORIZED,
     "TOKEN_INVALID": status.HTTP_401_UNAUTHORIZED,
     "TOKEN_EXPIRED": status.HTTP_401_UNAUTHORIZED,
     "TOKEN_REVOKED": status.HTTP_401_UNAUTHORIZED,
-
     # Security
     "SECURITY_BREACH": status.HTTP_403_FORBIDDEN,
 }
 
 
-def register_exception_handlers(app):
+def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(DomainException)
-    async def handle_domain_exception(request: Request, exc: DomainException):
+    async def handle_domain_exception(request: Request, exc: DomainException) -> JSONResponse:
         status_code = ERROR_CODE_TO_HTTP.get(exc.code, status.HTTP_400_BAD_REQUEST)
 
         logger.warning(
@@ -64,7 +58,7 @@ def register_exception_handlers(app):
         )
 
     @app.exception_handler(StarletteHTTPException)
-    async def handle_http_exception(request: Request, exc: StarletteHTTPException):
+    async def handle_http_exception(request: Request, exc: StarletteHTTPException) -> JSONResponse:
 
         logger.debug(
             "HTTP exception occurred",
@@ -73,7 +67,7 @@ def register_exception_handlers(app):
             path=request.url.path,
             method=request.method,
         )
-        
+
         return JSONResponse(
             status_code=exc.status_code,
             content={
@@ -84,7 +78,9 @@ def register_exception_handlers(app):
         )
 
     @app.exception_handler(RequestValidationError)
-    async def handle_validation_exception(request: Request, exc: RequestValidationError):
+    async def handle_validation_exception(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
         logger.debug(
             "Request validation failed",
             path=request.url.path,
@@ -103,7 +99,7 @@ def register_exception_handlers(app):
         )
 
     @app.exception_handler(IntegrityError)
-    async def handle_integrity_error(request: Request, exc: IntegrityError):
+    async def handle_integrity_error(request: Request, exc: IntegrityError) -> JSONResponse:
         logger.warning(
             "Database integrity violation",
             path=request.url.path,
@@ -119,7 +115,7 @@ def register_exception_handlers(app):
         )
 
     @app.exception_handler(Exception)
-    async def handle_unexpected_exception(request: Request, exc: Exception):
+    async def handle_unexpected_exception(request: Request, exc: Exception) -> JSONResponse:
         logger.exception(
             "Unhandled exception occurred",
             path=request.url.path,

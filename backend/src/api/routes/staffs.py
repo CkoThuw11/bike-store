@@ -71,6 +71,7 @@ async def update_staff(
 ) -> StaffDto:
     return await staff_service.update_staff(staff_id, command)
 
+
 @router.post(
     "/{staff_id}/activate",
     response_model=StaffDto,
@@ -93,7 +94,6 @@ async def deactivate_staff(
     staff_service: StaffService = Depends(get_staff_service),
 ) -> StaffDto:
     return await staff_service.deactivate_staff(staff_id)
-
 
 
 @router.delete(

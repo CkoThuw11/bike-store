@@ -252,7 +252,7 @@
         - DO keep integration tests focused on the repository layer only (no HTTP, no service logic).
         - DO keep e2e tests focused on HTTP contract verification (status codes, response shape, auth enforcement).
         - DO NOT introduce Docker dependencies in unit tests.
-        - The CI coverage gate is currently set to 80% for the unit suite. The long-term goal is 100% on Domain + Application layers.
+        - Unit test coverage (Domain + Application layers) is reported in CI but not yet gated — actual coverage is ~64% today, well short of the target. An 80% `--cov-fail-under` gate will be added once coverage catches up; until then, treat 100% on Domain + Application as the goal to write toward, not an enforced minimum.
         - DO NOT push frontend code that fails `ng lint` or `ng test`.
     </CI_Rules>
 </Workflow>

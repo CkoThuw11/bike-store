@@ -55,9 +55,7 @@ async def list_stocks_by_store(
 ) -> list[StockDto]:
     """Get stocks by store."""
 
-    return await stock_service.get_stock_by_store_id(
-        store_id
-    )
+    return await stock_service.get_stock_by_store_id(store_id)
 
 
 @router.get(
@@ -73,9 +71,7 @@ async def list_stocks_by_product(
 ) -> list[StockDto]:
     """Get stocks by product."""
 
-    return await stock_service.get_stock_by_product_id(
-        product_id
-    )
+    return await stock_service.get_stock_by_product_id(product_id)
 
 
 @router.get(

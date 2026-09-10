@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,9 +14,7 @@ class UpdateBrandCommand(BaseModel):
     """Command for partially updating an existing brand."""
 
     model_config = ConfigDict(str_strip_whitespace=True, strict=True)
-    brand_name: Optional[str] = Field(
-        None, min_length=1, max_length=100, description="Brand name"
-    )
+    brand_name: str | None = Field(None, min_length=1, max_length=100, description="Brand name")
 
 
 class ActivateBrandCommand(BaseModel):
@@ -30,6 +27,7 @@ class DeactivateBrandCommand(BaseModel):
     """Command for deactivating a brand."""
 
     brand_id: int
+
 
 class BrandDto(BaseModel):
     """Brand response DTO."""
@@ -46,7 +44,7 @@ class BrandListDto(BaseModel):
     """DTO for paginated brand list responses."""
 
     model_config = ConfigDict(strict=True)
-    brands: List[BrandDto] = Field(..., description="List of brands")
+    brands: list[BrandDto] = Field(..., description="List of brands")
     total: int = Field(..., description="Total number of brands")
     skip: int = Field(..., ge=0, description="Number of records skipped")
     limit: int = Field(..., ge=1, description="Maximum number of records returned")

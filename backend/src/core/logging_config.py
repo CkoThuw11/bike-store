@@ -17,11 +17,12 @@ def setup_logging(log_level: str = "INFO", log_format: str = "text") -> None:
     log_format = log_format.lower()
 
     # 1. Configure standard library logging for third-party libs
-    logging.Formatter.converter = time.gmtime  
+    logging.Formatter.converter = time.gmtime
 
     handler = logging.StreamHandler(sys.stdout)
     if log_format == "json":
         from pythonjsonlogger import jsonlogger
+
         formatter = jsonlogger.JsonFormatter(
             fmt="%(asctime)s %(levelname)s %(name)s %(message)s",
             datefmt="%Y-%m-%dT%H:%M:%SZ",

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,11 +9,12 @@ class CreateCategoryCommand(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, strict=True)
     category_name: str = Field(..., min_length=1, max_length=100, description="Category name")
 
+
 class UpdateCategoryCommand(BaseModel):
     """Command for partially updating an existing category."""
 
     model_config = ConfigDict(str_strip_whitespace=True, strict=True)
-    category_name: Optional[str] = Field(
+    category_name: str | None = Field(
         None, min_length=1, max_length=100, description="Category name"
     )
 
@@ -29,6 +29,7 @@ class DeactivateCategoryCommand(BaseModel):
     """Command for deactivating a category."""
 
     category_id: int
+
 
 class CategoryDto(BaseModel):
     """Category response DTO."""
@@ -46,7 +47,7 @@ class CategoryListDto(BaseModel):
     """DTO for paginated category list responses."""
 
     model_config = ConfigDict(strict=True)
-    categories: List[CategoryDto] = Field(..., description="List of categories")
+    categories: list[CategoryDto] = Field(..., description="List of categories")
     total: int = Field(..., description="Total number of categories")
     skip: int = Field(..., description="Number of records skipped")
     limit: int = Field(..., description="Maximum number of records returned")

@@ -124,9 +124,7 @@ async def test_list_all_respects_pagination(db_session):
 
     assert len(first_page) == 2
     assert len(second_page) == 2
-    assert {b.brand_name for b in first_page}.isdisjoint(
-        {b.brand_name for b in second_page}
-    )
+    assert {b.brand_name for b in first_page}.isdisjoint({b.brand_name for b in second_page})
 
 
 # ---------------------------------------------------------------------------
@@ -145,9 +143,7 @@ async def test_update_brand_name(db_session):
     assert updated.brand_name == "NewName"
 
     row = (
-        await db_session.execute(
-            select(BrandModel).where(BrandModel.brand_id == created.brand_id)
-        )
+        await db_session.execute(select(BrandModel).where(BrandModel.brand_id == created.brand_id))
     ).scalar_one()
     assert row.brand_name == "NewName"
 
@@ -163,9 +159,7 @@ async def test_update_deactivates_brand(db_session):
     assert updated.is_active is False
 
     row = (
-        await db_session.execute(
-            select(BrandModel).where(BrandModel.brand_id == created.brand_id)
-        )
+        await db_session.execute(select(BrandModel).where(BrandModel.brand_id == created.brand_id))
     ).scalar_one()
     assert row.is_active is False
 
@@ -184,9 +178,7 @@ async def test_delete_removes_brand_row(db_session):
 
     assert result is True
     row = (
-        await db_session.execute(
-            select(BrandModel).where(BrandModel.brand_id == created.brand_id)
-        )
+        await db_session.execute(select(BrandModel).where(BrandModel.brand_id == created.brand_id))
     ).scalar_one_or_none()
     assert row is None
 

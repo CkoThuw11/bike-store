@@ -33,9 +33,7 @@ async def _seed_product(db_session, seeded_catalog, name: str = "Stock Bike") ->
 
 async def _create_stock(db_session, store_id: int, product_id: int, qty: int = 10) -> Stock:
     repo = StockRepository(db_session)
-    return await repo.create(
-        Stock(store_id=store_id, product_id=product_id, quantity=qty)
-    )
+    return await repo.create(Stock(store_id=store_id, product_id=product_id, quantity=qty))
 
 
 # ---------------------------------------------------------------------------
@@ -52,9 +50,7 @@ async def test_create_stock_persists_record(db_session, seeded_catalog):
     assert stock.quantity == 25
 
     row = (
-        await db_session.execute(
-            select(StockModel).where(StockModel.stock_id == stock.stock_id)
-        )
+        await db_session.execute(select(StockModel).where(StockModel.stock_id == stock.stock_id))
     ).scalar_one()
     assert row.quantity == 25
     assert row.store_id == seeded_catalog["store_id"]
@@ -145,8 +141,6 @@ async def test_update_stock_quantity(db_session, seeded_catalog):
     assert updated.quantity == 42
 
     row = (
-        await db_session.execute(
-            select(StockModel).where(StockModel.stock_id == stock.stock_id)
-        )
+        await db_session.execute(select(StockModel).where(StockModel.stock_id == stock.stock_id))
     ).scalar_one()
     assert row.quantity == 42

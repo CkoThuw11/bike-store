@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+
 from src.domain.entities.brand import Brand
-from typing import List, Optional
+
 
 class IBrandRepository(ABC):
     """Contract for Brand persistence operations."""
@@ -11,17 +12,17 @@ class IBrandRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_brand_by_id(self, brand_id: int) -> Optional[Brand]:
+    async def get_brand_by_id(self, brand_id: int) -> Brand | None:
         """Return the brand with the given ID, or None if not found."""
         pass
 
     @abstractmethod
-    async def get_brand_by_name(self, brand_name: str) -> Optional[Brand]:
+    async def get_brand_by_name(self, brand_name: str) -> Brand | None:
         """Return the brand with the given name, or None if not found."""
         pass
 
     @abstractmethod
-    async def list_all(self, skip: int = 0, limit: int = 100) -> List[Brand]:
+    async def list_all(self, skip: int = 0, limit: int = 100) -> list[Brand]:
         """Return a paginated list of all brands."""
         pass
 

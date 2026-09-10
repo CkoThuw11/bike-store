@@ -37,9 +37,7 @@ async def create_product(
 ) -> ProductDto:
     """Create product."""
 
-    return await product_service.create_product(
-        command
-    )
+    return await product_service.create_product(command)
 
 
 @router.get(
@@ -75,9 +73,7 @@ async def search_products_by_name(
 ) -> list[ProductDto]:
     """Search products whose name contains the given term."""
 
-    return await product_service.search_products_by_name(
-        product_name
-    )
+    return await product_service.search_products_by_name(product_name)
 
 
 @router.get(
@@ -93,9 +89,7 @@ async def get_product(
 ) -> ProductDto:
     """Get product by id."""
 
-    return await product_service.get_product_by_id(
-        product_id
-    )
+    return await product_service.get_product_by_id(product_id)
 
 
 @router.put(
@@ -131,9 +125,7 @@ async def activate_product(
 ) -> ProductDto:
     """Activate product."""
 
-    return await product_service.activate_product(
-        product_id
-    )
+    return await product_service.activate_product(product_id)
 
 
 @router.post(
@@ -149,9 +141,7 @@ async def deactivate_product(
 ) -> ProductDto:
     """Soft delete product."""
 
-    return await product_service.deactivate_product(
-        product_id
-    )
+    return await product_service.deactivate_product(product_id)
 
 
 @router.delete(
@@ -167,6 +157,4 @@ async def delete_product(
 ) -> ProductDto:
     """Hard delete product."""
 
-    return await product_service.delete_product(
-        product_id
-    )
+    return await product_service.delete_product(product_id)

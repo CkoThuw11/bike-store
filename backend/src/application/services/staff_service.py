@@ -7,6 +7,7 @@ from src.domain.exceptions import (
 )
 from src.domain.repositories.staff_repository import IStaffRepository
 
+
 class StaffService:
     """Orchestrates all business logic related to staff members."""
 
@@ -33,7 +34,7 @@ class StaffService:
             email=command.email,
             store_id=command.store_id,
             phone=command.phone,
-            manager_id=command.manager_id
+            manager_id=command.manager_id,
         )
         created = await self._staff_repo.create(staff)
         return StaffDto.model_validate(created)
@@ -87,11 +88,11 @@ class StaffService:
             email=command.email,
             phone=command.phone,
             store_id=command.store_id,
-            manager_id=command.manager_id
+            manager_id=command.manager_id,
         )
         updated = await self._staff_repo.update(staff)
         return StaffDto.model_validate(updated)
-    
+
     async def activate_staff(self, staff_id: int) -> StaffDto:
         """Activate a staff member."""
         staff = await self._staff_repo.get_staff_by_id(staff_id)
@@ -110,7 +111,7 @@ class StaffService:
 
         staff.deactivate()
         updated = await self._staff_repo.update(staff)
-        return StaffDto.model_validate(updated)  
+        return StaffDto.model_validate(updated)
 
     async def delete_staff(self, staff_id: int) -> StaffDto:
         """Hard-delete a staff member; raises 404 if not found."""

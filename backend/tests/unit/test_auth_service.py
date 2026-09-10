@@ -1,7 +1,7 @@
 import pytest
 
 from src.application.services.auth_service import AuthService
-from src.domain.entities.refresh_token import RefreshToken, utc_now
+from src.domain.entities.refresh_token import RefreshToken
 from src.domain.entities.user import Role, User
 from src.domain.exceptions import (
     EmailAlreadyExistsError,
@@ -12,8 +12,6 @@ from src.domain.exceptions import (
 )
 
 pytestmark = [pytest.mark.unit]
-
-from datetime import timedelta
 
 
 class InMemoryUserRepository:

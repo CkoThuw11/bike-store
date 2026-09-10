@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+
 from src.domain.entities.order import Order
-from typing import List, Optional
 
 
 class IOrderRepository(ABC):
@@ -12,17 +12,17 @@ class IOrderRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_order_by_id(self, order_id: int) -> Optional[Order]:
+    async def get_order_by_id(self, order_id: int) -> Order | None:
         """Return the order with the given ID, or None if not found."""
         pass
 
     @abstractmethod
-    async def get_orders_by_customer_id(self, customer_id: int) -> List[Order]:
+    async def get_orders_by_customer_id(self, customer_id: int) -> list[Order]:
         """Return all orders placed by the given customer."""
         pass
 
     @abstractmethod
-    async def list_all(self, skip: int = 0, limit: int = 100) -> List[Order]:
+    async def list_all(self, skip: int = 0, limit: int = 100) -> list[Order]:
         """Return a paginated list of all orders."""
         pass
 

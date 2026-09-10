@@ -1,8 +1,9 @@
 # src/core/middleware.py
 import time
 import uuid
+
 import structlog
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -25,7 +26,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
          and status would be lost on that failure path)
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         if request.url.path in _SKIP_PATHS:
             return await call_next(request)
 

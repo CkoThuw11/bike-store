@@ -53,9 +53,7 @@ def _set_refresh_cookie(
 )
 async def register(
     command: RegisterCommand,
-    service: AuthService = Depends(
-        get_auth_service
-    ),
+    service: AuthService = Depends(get_auth_service),
 ) -> RegisterResponseDTO:
     """Register new account."""
 
@@ -74,9 +72,7 @@ async def register(
 async def login(
     command: LoginCommand,
     response: Response,
-    service: AuthService = Depends(
-        get_auth_service
-    ),
+    service: AuthService = Depends(get_auth_service),
 ) -> LoginResponseDTO:
     """Authenticate user."""
 
@@ -99,9 +95,7 @@ async def login(
 )
 async def refresh_access_token(
     response: Response,
-    service: AuthService = Depends(
-        get_auth_service
-    ),
+    service: AuthService = Depends(get_auth_service),
     refresh_token: str | None = Cookie(
         default=None,
         alias=REFRESH_COOKIE_KEY,
@@ -112,9 +106,7 @@ async def refresh_access_token(
     if refresh_token is None:
         raise TokenMissingError()
 
-    result = await service.refresh_access_token(
-        refresh_token
-    )
+    result = await service.refresh_access_token(refresh_token)
 
     _set_refresh_cookie(
         response,
@@ -130,9 +122,7 @@ async def refresh_access_token(
 )
 async def logout(
     response: Response,
-    service: AuthService = Depends(
-        get_auth_service
-    ),
+    service: AuthService = Depends(get_auth_service),
     refresh_token: str | None = Cookie(
         default=None,
         alias=REFRESH_COOKIE_KEY,
@@ -145,9 +135,7 @@ async def logout(
 
     await service.logout(refresh_token)
 
-    response.delete_cookie(
-        key=REFRESH_COOKIE_KEY
-    )
+    response.delete_cookie(key=REFRESH_COOKIE_KEY)
 
 
 @router.post(
@@ -157,10 +145,8 @@ async def logout(
 async def login_swagger(
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
-    service: AuthService = Depends(
-        get_auth_service
-    ),
-):
+    service: AuthService = Depends(get_auth_service),
+) -> dict:
     """
     Swagger OAuth2 compatible login.
     """
@@ -176,8 +162,6 @@ async def login_swagger(
     )
 
     return {
-        "access_token": (
-            result.token_pair.access_token
-        ),
+        "access_token": (result.token_pair.access_token),
         "token_type": "bearer",
     }

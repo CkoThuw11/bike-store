@@ -6,6 +6,7 @@ from src.domain.exceptions import (
 )
 from src.domain.repositories.store_repository import IStoreRepository
 
+
 class StoreService:
     """Orchestrates all business logic related to physical store locations."""
 
@@ -26,7 +27,7 @@ class StoreService:
             street=command.street,
             city=command.city,
             state=command.state,
-            zip_code=command.zip_code
+            zip_code=command.zip_code,
         )
         created = await self._store_repo.create(store)
         return StoreDto.model_validate(created)
@@ -56,13 +57,19 @@ class StoreService:
         if not store:
             raise EntityNotFoundError("Store", store_id)
 
-        if command.email and command.email != store.email:
-            if await self._store_repo.get_store_by_email(command.email):
-                raise EntityAlreadyExistsException("Store", command.email)
+        if (
+            command.email
+            and command.email != store.email
+            and await self._store_repo.get_store_by_email(command.email)
+        ):
+            raise EntityAlreadyExistsException("Store", command.email)
 
-        if command.store_name and command.store_name != store.store_name:
-            if await self._store_repo.get_store_by_name(command.store_name):
-                raise EntityAlreadyExistsException("Store", command.store_name)
+        if (
+            command.store_name
+            and command.store_name != store.store_name
+            and await self._store_repo.get_store_by_name(command.store_name)
+        ):
+            raise EntityAlreadyExistsException("Store", command.store_name)
 
         store.update_information(
             store_name=command.store_name,
@@ -71,7 +78,7 @@ class StoreService:
             street=command.street,
             city=command.city,
             state=command.state,
-            zip_code=command.zip_code
+            zip_code=command.zip_code,
         )
         updated = await self._store_repo.update(store)
         return StoreDto.model_validate(updated)

@@ -1,7 +1,6 @@
 import hashlib
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from jose import jwt
 
@@ -15,7 +14,7 @@ def create_access_token(user_id: int, role: str) -> str:
         "role": role,
         "type": "access",
         "jti": str(uuid.uuid4()),
-        "exp": datetime.now(timezone.utc).replace(tzinfo=None)
+        "exp": datetime.now(UTC).replace(tzinfo=None)
         + timedelta(minutes=settings.auth.access_token_expire_minutes),
     }
     return jwt.encode(payload, settings.auth.secret_key, algorithm=settings.auth.algorithm)
@@ -27,13 +26,13 @@ def create_refresh_token(user_id: int) -> str:
         "sub": str(user_id),
         "type": "refresh",
         "jti": str(uuid.uuid4()),
-        "exp": datetime.now(timezone.utc).replace(tzinfo=None)
+        "exp": datetime.now(UTC).replace(tzinfo=None)
         + timedelta(days=settings.auth.refresh_token_expire_days),
     }
     return jwt.encode(payload, settings.auth.secret_key, algorithm=settings.auth.algorithm)
 
 
-def decode_token(token: str) -> Optional[dict]:
+def decode_token(token: str) -> dict | None:
     """Decode and verify a JWT token; returns None on any error."""
     if not token:
         return None

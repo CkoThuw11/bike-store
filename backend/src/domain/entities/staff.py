@@ -11,7 +11,7 @@ class Staff(BaseEntity):
     last_name: str
     email: str
     store_id: int
-    phone: str 
+    phone: str
     manager_id: int | None = None
     is_active: bool = True
     staff_id: int | None = field(default=None)
@@ -33,7 +33,7 @@ class Staff(BaseEntity):
         email: str | None = None,
         phone: str | None = None,
         store_id: int | None = None,
-        manager_id: int | None = None
+        manager_id: int | None = None,
     ) -> None:
         """Apply partial staff information updates."""
         self.apply_updates(

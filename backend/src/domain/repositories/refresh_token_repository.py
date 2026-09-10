@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+
 from src.domain.entities.refresh_token import RefreshToken
 
-class IRefreshTokenRepository(ABC):
 
+class IRefreshTokenRepository(ABC):
     @abstractmethod
     async def save(self, entity: RefreshToken) -> RefreshToken:
         pass
 
     @abstractmethod
-    async def get_by_hash(self, token_hash: str) -> Optional[RefreshToken]:
+    async def get_by_hash(self, token_hash: str) -> RefreshToken | None:
         pass
 
     @abstractmethod

@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.domain.entities.brand import Brand
 from src.domain.repositories.brand_repository import IBrandRepository
 from src.infrastructure.database.models import BrandModel
@@ -55,9 +56,7 @@ class BrandRepository(IBrandRepository):
 
     async def list_all(self, skip: int = 0, limit: int = 100) -> list[Brand]:
         """Return a paginated list of all brands."""
-        result = await self._session.execute(
-            select(BrandModel).offset(skip).limit(limit)
-        )
+        result = await self._session.execute(select(BrandModel).offset(skip).limit(limit))
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def update(self, brand: Brand) -> Brand:
@@ -79,7 +78,7 @@ class BrandRepository(IBrandRepository):
             select(BrandModel).where(BrandModel.brand_id == brand_id)
         )
         model = result.scalar_one_or_none()
-        if model: 
+        if model:
             await self._session.delete(model)
             await self._session.flush()
             return True

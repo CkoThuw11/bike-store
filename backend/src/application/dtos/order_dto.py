@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Optional, List
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from src.domain.entities.order import (
     OrderStatus,
 )
@@ -51,13 +52,14 @@ class CheckoutOrderCommand(BaseModel):
 
     @field_validator("required_date", mode="before")
     @classmethod
-    def parse_datetime(cls, v):
+    def parse_datetime(cls, v: object) -> datetime:
         if isinstance(v, datetime):
             return v.replace(tzinfo=None) if v.tzinfo else v
         if isinstance(v, str):
             dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
             return dt.replace(tzinfo=None)
         raise ValueError(f"Invalid datetime: {v}")
+
 
 class UpdateOrderCommand(BaseModel):
     """Update order information."""
@@ -67,15 +69,15 @@ class UpdateOrderCommand(BaseModel):
         strict=True,
     )
 
-    order_status: Optional[OrderStatus] = None
+    order_status: OrderStatus | None = None
 
-    required_date: Optional[datetime] = None
+    required_date: datetime | None = None
 
-    shipped_date: Optional[datetime] = None
+    shipped_date: datetime | None = None
 
     @field_validator("order_status", mode="before")
     @classmethod
-    def parse_order_status(cls, v):
+    def parse_order_status(cls, v: object) -> OrderStatus:
         if isinstance(v, OrderStatus):
             return v
         if isinstance(v, int):
@@ -84,7 +86,7 @@ class UpdateOrderCommand(BaseModel):
 
     @field_validator("required_date", "shipped_date", mode="before")
     @classmethod
-    def parse_datetime(cls, v):
+    def parse_datetime(cls, v: object) -> datetime:
         if isinstance(v, datetime):
             return v.replace(tzinfo=None) if v.tzinfo else v
         if isinstance(v, str):
@@ -108,13 +110,13 @@ class OrderDto(BaseModel):
 
     order_date: datetime
 
-    required_date: Optional[datetime]
+    required_date: datetime | None
 
-    shipped_date: Optional[datetime]
+    shipped_date: datetime | None
 
-    store_id: Optional[int]
+    store_id: int | None
 
-    staff_id: Optional[int]
+    staff_id: int | None
 
     created_at: datetime
     updated_at: datetime
@@ -128,7 +130,7 @@ class OrderListDto(BaseModel):
         strict=True,
     )
 
-    orders: List[OrderDto]
+    orders: list[OrderDto]
 
     total: int
 

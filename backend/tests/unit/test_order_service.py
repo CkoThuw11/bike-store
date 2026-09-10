@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -7,7 +7,6 @@ from src.application.dtos.order_dto import CheckoutOrderCommand, CreateOrderComm
 from src.application.services.order_service import OrderService
 from src.domain.entities.order import Order, OrderStatus
 from src.domain.entities.order_item import OrderItem
-from src.domain.entities.stock import Stock
 from src.domain.exceptions import BusinessRuleViolationError, EntityNotFoundError
 
 pytestmark = [pytest.mark.unit]
@@ -168,7 +167,9 @@ async def test_checkout_order_transitions_to_processing():
 
     result = await service.checkout_order(
         created.order_id,
-        CheckoutOrderCommand(required_date=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)),
+        CheckoutOrderCommand(
+            required_date=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=7)
+        ),
     )
 
     assert result.order_status == OrderStatus.PROCESSING
@@ -198,7 +199,9 @@ async def test_checkout_order_deducts_stock():
 
     await service.checkout_order(
         created.order_id,
-        CheckoutOrderCommand(required_date=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)),
+        CheckoutOrderCommand(
+            required_date=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=7)
+        ),
     )
 
     assert stock_service.adjustments == [(1, 5, -3)]
@@ -216,7 +219,9 @@ async def test_checkout_rejects_non_pending_order():
     with pytest.raises(BusinessRuleViolationError):
         await service.checkout_order(
             created.order_id,
-            CheckoutOrderCommand(required_date=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)),
+            CheckoutOrderCommand(
+                required_date=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=7)
+            ),
         )
 
 
@@ -229,7 +234,9 @@ async def test_checkout_rejects_empty_order():
     with pytest.raises(BusinessRuleViolationError):
         await service.checkout_order(
             created.order_id,
-            CheckoutOrderCommand(required_date=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)),
+            CheckoutOrderCommand(
+                required_date=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=7)
+            ),
         )
 
 
@@ -258,7 +265,9 @@ async def test_checkout_rejects_insufficient_stock():
     with pytest.raises(BusinessRuleViolationError):
         await service.checkout_order(
             created.order_id,
-            CheckoutOrderCommand(required_date=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)),
+            CheckoutOrderCommand(
+                required_date=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=7)
+            ),
         )
 
 

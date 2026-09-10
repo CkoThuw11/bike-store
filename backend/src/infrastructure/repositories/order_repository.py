@@ -65,9 +65,7 @@ class OrderRepository(IOrderRepository):
 
     async def list_all(self, skip: int = 0, limit: int = 100) -> list[Order]:
         """Return a paginated list of all orders."""
-        result = await self._session.execute(
-            select(OrderModel).offset(skip).limit(limit)
-        )
+        result = await self._session.execute(select(OrderModel).offset(skip).limit(limit))
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def update(self, order: Order) -> Order:
@@ -93,7 +91,7 @@ class OrderRepository(IOrderRepository):
             select(OrderModel).where(OrderModel.order_id == order_id)
         )
         model = result.scalar_one_or_none()
-        if model: 
+        if model:
             await self._session.delete(model)
             await self._session.flush()
             return True

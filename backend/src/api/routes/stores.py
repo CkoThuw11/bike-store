@@ -59,6 +59,7 @@ async def update_store(
 ) -> StoreDto:
     return await store_service.update_store(store_id, command)
 
+
 @router.post(
     "/{store_id}/activate",
     response_model=StoreDto,
@@ -81,6 +82,7 @@ async def deactivate_store(
     store_service: StoreService = Depends(get_store_service),
 ) -> StoreDto:
     return await store_service.deactivate_store(store_id)
+
 
 @router.delete(
     "/{store_id}",

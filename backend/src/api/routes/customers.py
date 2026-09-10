@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, status
 
 from src.api.dependencies.auth import get_current_user, require_role
 from src.api.dependencies.services import get_customer_service
-from src.application.dtos.customer_dto import CreateCustomerCommand, CustomerDto, UpdateCustomerCommand
+from src.application.dtos.customer_dto import (
+    CreateCustomerCommand,
+    CustomerDto,
+    UpdateCustomerCommand,
+)
 from src.application.services.customer_service import CustomerService
 from src.domain.entities.user import Role
 

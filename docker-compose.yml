@@ -1,4 +1,20 @@
 services:
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bike-store-migrate
+    volumes:
+      - ./backend/alembic:/app/alembic
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python -m alembic upgrade head
+
   backend:
     build:
       context: ./backend
@@ -16,6 +32,8 @@ services:
       PYTHONUNBUFFERED: "1"
       WATCHFILES_FORCE_POLLING: "true"
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
     command: >
@@ -51,7 +69,6 @@ services:
       - "${DATABASE_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test:
         [

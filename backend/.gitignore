@@ -27,8 +27,12 @@ dist/
 # Testing
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 .tox/
+
+# Ruff
+.ruff_cache/
 
 # Alembic (keep structure, ignore auto-generated)
 alembic/versions/*.pyc

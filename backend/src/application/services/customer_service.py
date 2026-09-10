@@ -1,4 +1,8 @@
-from src.application.dtos.customer_dto import CustomerDto, CreateCustomerCommand, UpdateCustomerCommand
+from src.application.dtos.customer_dto import (
+    CreateCustomerCommand,
+    CustomerDto,
+    UpdateCustomerCommand,
+)
 from src.domain.entities.customer import Customer
 from src.domain.exceptions import EntityAlreadyExistsException, EntityNotFoundError
 from src.domain.repositories.customer_repository import ICustomerRepository
@@ -26,7 +30,7 @@ class CustomerService:
             street=getattr(address, "street", None),
             city=getattr(address, "city", None),
             state=getattr(address, "state", None),
-            zip_code=getattr(address, "zip_code", None)
+            zip_code=getattr(address, "zip_code", None),
         )
         created = await self._customer_repo.create(customer)
         return CustomerDto.model_validate(created)
@@ -55,7 +59,9 @@ class CustomerService:
         customers = await self._customer_repo.list_all(skip, limit)
         return [CustomerDto.model_validate(c) for c in customers]
 
-    async def update_customer(self, customer_id: int, command: UpdateCustomerCommand) -> CustomerDto:
+    async def update_customer(
+        self, customer_id: int, command: UpdateCustomerCommand
+    ) -> CustomerDto:
         """Apply partial updates to an existing customer, enforcing email uniqueness."""
         customer = await self._customer_repo.get_customer_by_id(customer_id)
         if not customer:
@@ -99,7 +105,6 @@ class CustomerService:
         category.deactivate()
         updated = await self._customer_repo.update(category)
         return CustomerDto.model_validate(updated)
-    
 
     async def delete_customer(self, customer_id: int) -> CustomerDto:
         """Hard-delete a customer record; raises 404 if not found."""

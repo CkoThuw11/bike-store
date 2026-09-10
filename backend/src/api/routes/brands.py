@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from src.api.dependencies.auth import get_current_user, require_role
 from src.api.dependencies.services import get_brand_service
@@ -28,7 +28,7 @@ async def create_brand(
     dependencies=[Depends(get_current_user)],
 )
 async def list_brands(
-    skip: int = Query(default=0, ge=0),   
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     brand_service: BrandService = Depends(get_brand_service),
 ) -> list[BrandDto]:
@@ -59,6 +59,7 @@ async def update_brand(
 ) -> BrandDto:
     return await brand_service.update_brand(brand_id, command)
 
+
 @router.post(
     "/{brand_id}/activate",
     response_model=BrandDto,
@@ -69,7 +70,6 @@ async def activate_brand(
     brand_service: BrandService = Depends(get_brand_service),
 ) -> BrandDto:
     return await brand_service.activate_brand(brand_id)
-
 
 
 @router.post(
@@ -94,5 +94,3 @@ async def delete_brand(
     brand_service: BrandService = Depends(get_brand_service),
 ) -> BrandDto:
     return await brand_service.delete_brand(brand_id)
-
-

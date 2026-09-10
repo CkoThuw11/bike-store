@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+
 from src.domain.entities.order_item import OrderItem
-from typing import List, Optional
 
 
 class IOrderItemRepository(ABC):
@@ -12,17 +12,19 @@ class IOrderItemRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_order_item_by_order_product_id(self, order_id: int, product_id: int) -> Optional[OrderItem]:
+    async def get_order_item_by_order_product_id(
+        self, order_id: int, product_id: int
+    ) -> OrderItem | None:
         """Return the item for the given (order_id, product_id) pair, or None."""
         pass
 
     @abstractmethod
-    async def get_order_items_by_order_id(self, order_id: int) -> List[OrderItem]:
+    async def get_order_items_by_order_id(self, order_id: int) -> list[OrderItem]:
         """Return all line items belonging to the given order."""
         pass
 
     @abstractmethod
-    async def list_all(self, skip: int = 0, limit: int = 100) -> List[OrderItem]:
+    async def list_all(self, skip: int = 0, limit: int = 100) -> list[OrderItem]:
         """Return a paginated list of all order items."""
         pass
 

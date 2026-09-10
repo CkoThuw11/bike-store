@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+
 from src.domain.entities.customer import Customer
-from typing import List, Optional
 
 
 class ICustomerRepository(ABC):
@@ -12,27 +12,27 @@ class ICustomerRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
+    async def get_customer_by_id(self, customer_id: int) -> Customer | None:
         """Return the customer with the given ID, or None if not found."""
         pass
 
     @abstractmethod
-    async def get_customer_by_email(self, email: str) -> Optional[Customer]:
+    async def get_customer_by_email(self, email: str) -> Customer | None:
         """Return the customer with the given email, or None if not found."""
         pass
 
     @abstractmethod
-    async def get_customer_by_name(self, first_name: str) -> Optional[Customer]:
+    async def get_customer_by_name(self, first_name: str) -> Customer | None:
         """Return a single customer matching the given first name, or None."""
         pass
 
     @abstractmethod
-    async def search_by_name(self, name: str) -> List[Customer]:
+    async def search_by_name(self, name: str) -> list[Customer]:
         """Return all customers whose first or last name contains the search term."""
         pass
 
     @abstractmethod
-    async def list_all(self, skip: int = 0, limit: int = 100) -> List[Customer]:
+    async def list_all(self, skip: int = 0, limit: int = 100) -> list[Customer]:
         """Return a paginated list of all customers."""
         pass
 

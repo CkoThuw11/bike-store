@@ -31,15 +31,11 @@ router = APIRouter(
 )
 async def create_order_item(
     command: CreateOrderItemCommand,
-    order_item_service: OrderItemService = Depends(
-        get_order_item_service
-    ),
+    order_item_service: OrderItemService = Depends(get_order_item_service),
 ) -> OrderItemDto:
     """Create order item."""
 
-    return await order_item_service.create_order_item(
-        command
-    )
+    return await order_item_service.create_order_item(command)
 
 
 @router.get(
@@ -50,9 +46,7 @@ async def create_order_item(
 async def list_order_items(
     skip: int = 0,
     limit: int = 100,
-    order_item_service: OrderItemService = Depends(
-        get_order_item_service
-    ),
+    order_item_service: OrderItemService = Depends(get_order_item_service),
 ) -> list[OrderItemDto]:
     """List all order items."""
 
@@ -69,15 +63,11 @@ async def list_order_items(
 )
 async def list_items_by_order(
     order_id: int,
-    order_item_service: OrderItemService = Depends(
-        get_order_item_service
-    ),
+    order_item_service: OrderItemService = Depends(get_order_item_service),
 ) -> list[OrderItemDto]:
     """List items by order id."""
 
-    return await order_item_service.list_items_by_order_id(
-        order_id
-    )
+    return await order_item_service.list_items_by_order_id(order_id)
 
 
 @router.get(
@@ -88,9 +78,7 @@ async def list_items_by_order(
 async def get_order_item(
     order_id: int,
     product_id: int,
-    order_item_service: OrderItemService = Depends(
-        get_order_item_service
-    ),
+    order_item_service: OrderItemService = Depends(get_order_item_service),
 ) -> OrderItemDto:
     """Get order item by composite key."""
 
@@ -109,9 +97,7 @@ async def update_order_item(
     order_id: int,
     product_id: int,
     command: UpdateOrderItemCommand,
-    order_item_service: OrderItemService = Depends(
-        get_order_item_service
-    ),
+    order_item_service: OrderItemService = Depends(get_order_item_service),
 ) -> OrderItemDto:
     """Update order item."""
 
@@ -130,9 +116,7 @@ async def update_order_item(
 async def delete_order_item(
     order_id: int,
     product_id: int,
-    order_item_service: OrderItemService = Depends(
-        get_order_item_service
-    ),
+    order_item_service: OrderItemService = Depends(get_order_item_service),
 ) -> OrderItemDto:
     """Delete order item."""
 

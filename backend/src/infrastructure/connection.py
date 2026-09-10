@@ -1,6 +1,9 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from src.infrastructure.configs import settings
-from typing import AsyncGenerator
+
 # Create async engine
 engine = create_async_engine(
     settings.database.url,
@@ -18,6 +21,7 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
     autocommit=False,
 )
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency that provides a session per request."""

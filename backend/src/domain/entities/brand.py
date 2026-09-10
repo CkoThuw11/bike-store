@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+
 from .base_entity import BaseEntity
 
 

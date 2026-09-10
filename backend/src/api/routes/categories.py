@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, status
 
 from src.api.dependencies.auth import get_current_user, require_role
 from src.api.dependencies.services import get_category_service
-from src.application.dtos.category_dto import CategoryDto, CreateCategoryCommand, UpdateCategoryCommand
+from src.application.dtos.category_dto import (
+    CategoryDto,
+    CreateCategoryCommand,
+    UpdateCategoryCommand,
+)
 from src.application.services.category_service import CategoryService
 from src.domain.entities.user import Role
 
@@ -94,5 +98,3 @@ async def delete_category(
     category_service: CategoryService = Depends(get_category_service),
 ) -> CategoryDto:
     return await category_service.delete_category(category_id)
-
-

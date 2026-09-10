@@ -1,25 +1,31 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    DECIMAL,
     Boolean,
     CheckConstraint,
     DateTime,
-    DECIMAL,
-    Enum as SAEnum,
     ForeignKey,
     Integer,
     String,
     UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column
+from sqlalchemy import (
+    Enum as SAEnum,
+)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from src.domain.entities.user import Role
 
-def _utcnow():
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
-Base = declarative_base()
+def _utcnow() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 class BrandModel(Base):
     __tablename__ = "brands"
@@ -31,6 +37,7 @@ class BrandModel(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=_utcnow, onupdate=_utcnow, nullable=False
     )
+
 
 class CategoryModel(Base):
     __tablename__ = "categories"
@@ -72,9 +79,7 @@ class OrderItemModel(Base):
     )
 
     item_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    order_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("orders.order_id"), nullable=False
-    )
+    order_id: Mapped[int] = mapped_column(Integer, ForeignKey("orders.order_id"), nullable=False)
     product_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("products.product_id"), nullable=False
     )
@@ -98,7 +103,7 @@ class OrderModel(Base):
     order_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     required_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     shipped_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    store_id: Mapped[int |None] = mapped_column(
+    store_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("stores.store_id"), nullable=False
     )
     staff_id: Mapped[int | None] = mapped_column(
@@ -112,18 +117,14 @@ class OrderModel(Base):
 
 class ProductModel(Base):
     __tablename__ = "products"
-    __table_args__ = (
-        CheckConstraint("list_price > 0", name="ck_products_price_positive"),
-    )
+    __table_args__ = (CheckConstraint("list_price > 0", name="ck_products_price_positive"),)
 
     product_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     product_name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     category_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("categories.category_id"), nullable=False
     )
-    brand_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("brands.brand_id"), nullable=False
-    )
+    brand_id: Mapped[int] = mapped_column(Integer, ForeignKey("brands.brand_id"), nullable=False)
     model_year: Mapped[int] = mapped_column(Integer, nullable=False)
     list_price: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -141,9 +142,7 @@ class StaffModel(Base):
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     phone: Mapped[str] = mapped_column(String(100), nullable=True, unique=True)
-    store_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("stores.store_id"), nullable=False
-    )
+    store_id: Mapped[int] = mapped_column(Integer, ForeignKey("stores.store_id"), nullable=False)
     manager_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("staffs.staff_id"), nullable=True
     )
@@ -162,7 +161,7 @@ class StoreModel(Base):
     phone: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     street: Mapped[str] = mapped_column(String(100), nullable=False)
-    city: Mapped[str]= mapped_column(String(100), nullable=True)
+    city: Mapped[str] = mapped_column(String(100), nullable=True)
     state: Mapped[str] = mapped_column(String(100), nullable=False)
     zip_code: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -180,9 +179,7 @@ class StockModel(Base):
     )
 
     stock_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    store_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("stores.store_id"), nullable=False
-    )
+    store_id: Mapped[int] = mapped_column(Integer, ForeignKey("stores.store_id"), nullable=False)
     product_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("products.product_id"), nullable=False
     )
@@ -201,9 +198,7 @@ class UserModel(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     username: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
     fullname: Mapped[str] = mapped_column(String(60), nullable=False)
-    role: Mapped[Role] = mapped_column(
-        SAEnum(Role), nullable=False, default=Role.CUSTOMER
-    )
+    role: Mapped[Role] = mapped_column(SAEnum(Role), nullable=False, default=Role.CUSTOMER)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(

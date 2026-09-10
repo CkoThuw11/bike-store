@@ -32,9 +32,7 @@ async def _create_product(client, seeded_catalog, name="HTTP Bike", price="1599.
 
 
 @pytest.mark.asyncio
-async def test_create_product_returns_201_and_initialises_stock(
-    client, db_session, seeded_catalog
-):
+async def test_create_product_returns_201_and_initialises_stock(client, db_session, seeded_catalog):
     response = await _create_product(client, seeded_catalog)
 
     assert response.status_code == 201
@@ -52,10 +50,14 @@ async def test_create_product_returns_201_and_initialises_stock(
     assert row.product_name == "HTTP Bike"
 
     stocks = (
-        await db_session.execute(
-            select(StockModel).where(StockModel.product_id == data["product_id"])
+        (
+            await db_session.execute(
+                select(StockModel).where(StockModel.product_id == data["product_id"])
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert len(stocks) == 1
     assert stocks[0].store_id == seeded_catalog["store_id"]
     assert stocks[0].quantity == 0
@@ -142,16 +144,17 @@ async def test_search_product_by_name_returns_200(client, seeded_catalog):
     )
 
     assert response.status_code == 200
-    assert response.json()["product_name"] == "Mountain Fury"
+    results = response.json()
+    assert len(results) == 1
+    assert results[0]["product_name"] == "Mountain Fury"
 
 
 @pytest.mark.asyncio
-async def test_search_product_by_name_not_found_returns_404(client):
-    response = await client.get(
-        "/products/search/by-name", params={"product_name": "Ghost Bike"}
-    )
+async def test_search_product_by_name_not_found_returns_empty_list(client):
+    response = await client.get("/products/search/by-name", params={"product_name": "Ghost Bike"})
 
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 # ---------------------------------------------------------------------------
@@ -209,17 +212,29 @@ async def test_activate_product_returns_200_and_is_active_true(client, seeded_ca
 
 
 @pytest.mark.asyncio
-async def test_delete_product_returns_200_and_removes_row(client, db_session, seeded_catalog):
+async def test_delete_inactive_product_returns_200_and_removes_row(
+    client, db_session, seeded_catalog
+):
     create_resp = await _create_product(client, seeded_catalog)
     product_id = create_resp.json()["product_id"]
+    await client.post(f"/products/{product_id}/deactivate")
 
     response = await client.delete(f"/products/{product_id}")
 
     assert response.status_code == 200
 
     row = (
-        await db_session.execute(
-            select(ProductModel).where(ProductModel.product_id == product_id)
-        )
+        await db_session.execute(select(ProductModel).where(ProductModel.product_id == product_id))
     ).scalar_one_or_none()
     assert row is None
+
+
+@pytest.mark.asyncio
+async def test_delete_active_product_returns_422(client, seeded_catalog):
+    create_resp = await _create_product(client, seeded_catalog)
+    product_id = create_resp.json()["product_id"]
+
+    response = await client.delete(f"/products/{product_id}")
+
+    assert response.status_code == 422
+    assert response.json()["error"] == "BUSINESS_RULE_VIOLATION"

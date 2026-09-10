@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 from .base_entity import BaseEntity
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     ADMIN = "ADMIN"
     CUSTOMER = "CUSTOMER"
 

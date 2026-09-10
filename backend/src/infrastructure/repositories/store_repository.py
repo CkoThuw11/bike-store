@@ -68,17 +68,13 @@ class StoreRepository(IStoreRepository):
 
     async def get_store_by_email(self, email: str) -> Store | None:
         """Return the store with the given email, or None."""
-        result = await self._session.execute(
-            select(StoreModel).where(StoreModel.email == email)
-        )
+        result = await self._session.execute(select(StoreModel).where(StoreModel.email == email))
         model = result.scalar_one_or_none()
         return self._to_entity(model) if model else None
 
     async def list_all(self, skip: int = 0, limit: int = 100) -> list[Store]:
         """Return a paginated list of all stores."""
-        result = await self._session.execute(
-            select(StoreModel).offset(skip).limit(limit)
-        )
+        result = await self._session.execute(select(StoreModel).offset(skip).limit(limit))
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def update(self, store: Store) -> Store:
@@ -105,7 +101,7 @@ class StoreRepository(IStoreRepository):
             select(StoreModel).where(StoreModel.store_id == store_id)
         )
         model = result.scalar_one_or_none()
-        if model: 
+        if model:
             await self._session.delete(model)
             await self._session.flush()
             return True

@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, List
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -36,8 +35,8 @@ class CreateOrderItemCommand(BaseModel):
     def parse_decimal(cls, v: object) -> Decimal:
         try:
             return Decimal(str(v))
-        except Exception:
-            raise ValueError(f"Invalid decimal value: {v}")
+        except Exception as exc:
+            raise ValueError(f"Invalid decimal value: {v}") from exc
 
 
 class UpdateOrderItemCommand(BaseModel):
@@ -48,7 +47,7 @@ class UpdateOrderItemCommand(BaseModel):
         strict=True,
     )
 
-    quantity: Optional[int] = Field(
+    quantity: int | None = Field(
         None,
         gt=0,
     )
@@ -87,7 +86,7 @@ class OrderItemListDto(BaseModel):
         strict=True,
     )
 
-    order_items: List[OrderItemDto]
+    order_items: list[OrderItemDto]
 
     total: int
 

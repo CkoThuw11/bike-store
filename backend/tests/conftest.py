@@ -1,3 +1,4 @@
+import contextlib
 import os
 from collections.abc import AsyncGenerator, Generator
 
@@ -58,10 +59,8 @@ async def db_session(test_database_url: str) -> AsyncGenerator[AsyncSession, Non
         try:
             yield session
         finally:
-            try:
+            with contextlib.suppress(Exception):
                 await session.rollback()
-            except Exception:
-                pass
             await session.close()
     finally:
         await engine.dispose()

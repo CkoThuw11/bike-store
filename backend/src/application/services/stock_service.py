@@ -105,10 +105,7 @@ class StockService:
             product_id,
         )
 
-        return [
-            StockDto.model_validate(stock)
-            for stock in stocks
-        ]
+        return [StockDto.model_validate(stock) for stock in stocks]
 
     async def get_stock_by_store_id(
         self,
@@ -122,10 +119,7 @@ class StockService:
             store_id,
         )
 
-        return [
-            StockDto.model_validate(stock)
-            for stock in stocks
-        ]
+        return [StockDto.model_validate(stock) for stock in stocks]
 
     async def get_all_stock(
         self,
@@ -139,10 +133,7 @@ class StockService:
             limit,
         )
 
-        return [
-            StockDto.model_validate(stock)
-            for stock in stocks
-        ]
+        return [StockDto.model_validate(stock) for stock in stocks]
 
     async def update_stock(
         self,
@@ -169,9 +160,7 @@ class StockService:
         )
 
         if command.quantity < 0:
-            raise BusinessRuleViolationError(
-                "Stock quantity cannot be negative."
-            )
+            raise BusinessRuleViolationError("Stock quantity cannot be negative.")
 
         stock.update_information(
             quantity=command.quantity,
@@ -209,13 +198,11 @@ class StockService:
 
         if new_quantity < 0:
             raise BusinessRuleViolationError(
-                (
-                    f"Insufficient stock for "
-                    f"product '{product_id}' "
-                    f"at store '{store_id}'. "
-                    f"Available: {stock.quantity}, "
-                    f"requested reduction: {abs(delta)}."
-                )
+                f"Insufficient stock for "
+                f"product '{product_id}' "
+                f"at store '{store_id}'. "
+                f"Available: {stock.quantity}, "
+                f"requested reduction: {abs(delta)}."
             )
 
         stock.update_information(

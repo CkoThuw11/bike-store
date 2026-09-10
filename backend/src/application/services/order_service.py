@@ -1,9 +1,11 @@
+from datetime import UTC, datetime
+
 from src.application.dtos.order_dto import (
-    CreateOrderCommand,
     CheckoutOrderCommand,
+    CreateOrderCommand,
     OrderDto,
-    UpdateOrderCommand,
     OrderStatus,
+    UpdateOrderCommand,
 )
 from src.application.services.customer_service import CustomerService
 from src.application.services.staff_service import StaffService
@@ -19,7 +21,7 @@ from src.domain.repositories.orderitem_repository import (
     IOrderItemRepository,
 )
 
-from datetime import datetime, timezone
+
 class OrderService:
     """
     Application service responsible for order workflows.
@@ -55,9 +57,7 @@ class OrderService:
     ) -> Order:
         """Get existing order or raise 404."""
 
-        order = await self._order_repo.get_order_by_id(
-            order_id
-        )
+        order = await self._order_repo.get_order_by_id(order_id)
 
         if not order:
             raise EntityNotFoundError(
@@ -77,9 +77,7 @@ class OrderService:
         This acts as shopping cart.
         """
 
-        await self._customer_service.check_customer_exist(
-            command.customer_id
-        )
+        await self._customer_service.check_customer_exist(command.customer_id)
         store_id = 1
         staff_id = 1
         order = Order(
@@ -91,9 +89,7 @@ class OrderService:
             staff_id=staff_id,
         )
 
-        created = await self._order_repo.create(
-            order
-        )
+        created = await self._order_repo.create(order)
         return OrderDto.model_validate(created)
 
     async def checkout_order(
@@ -114,23 +110,15 @@ class OrderService:
         7. Update order status
         """
 
-        order = await self._get_existing_order(
-            order_id
-        )
+        order = await self._get_existing_order(order_id)
 
         if order.order_status != OrderStatus.PENDING:
-            raise BusinessRuleViolationError(
-                "Only pending orders can be checked out."
-            )
+            raise BusinessRuleViolationError("Only pending orders can be checked out.")
 
-        items = await self._order_item_repo.get_order_items_by_order_id(
-            order_id
-        )
+        items = await self._order_item_repo.get_order_items_by_order_id(order_id)
 
         if not items:
-            raise BusinessRuleViolationError(
-                "Cannot checkout empty order."
-            )
+            raise BusinessRuleViolationError("Cannot checkout empty order.")
 
         #
         # TEMPORARY assignment strategy
@@ -138,13 +126,9 @@ class OrderService:
         assigned_store_id = 1
         assigned_staff_id = 1
 
-        await self._store_service.check_store_exist(
-            assigned_store_id
-        )
+        await self._store_service.check_store_exist(assigned_store_id)
 
-        await self._staff_service.check_staff_exist(
-            assigned_staff_id
-        )
+        await self._staff_service.check_staff_exist(assigned_staff_id)
 
         #
         # Validate stock
@@ -157,12 +141,10 @@ class OrderService:
 
             if stock.quantity < item.quantity:
                 raise BusinessRuleViolationError(
-                    (
-                        f"Insufficient stock for "
-                        f"product '{item.product_id}'. "
-                        f"Available: {stock.quantity}, "
-                        f"requested: {item.quantity}."
-                    )
+                    f"Insufficient stock for "
+                    f"product '{item.product_id}'. "
+                    f"Available: {stock.quantity}, "
+                    f"requested: {item.quantity}."
                 )
 
         #
@@ -180,15 +162,13 @@ class OrderService:
         #
         order.update_information(
             order_status=OrderStatus.PROCESSING,
-            order_date=datetime.now(timezone.utc).replace(tzinfo=None),
+            order_date=datetime.now(UTC).replace(tzinfo=None),
             required_date=command.required_date,
             store_id=assigned_store_id,
             staff_id=assigned_staff_id,
         )
 
-        updated = await self._order_repo.update(
-            order
-        )
+        updated = await self._order_repo.update(order)
 
         return OrderDto.model_validate(updated)
 
@@ -198,9 +178,7 @@ class OrderService:
     ) -> OrderDto:
         """Get order by ID."""
 
-        order = await self._get_existing_order(
-            order_id
-        )
+        order = await self._get_existing_order(order_id)
 
         return OrderDto.model_validate(order)
 
@@ -210,18 +188,11 @@ class OrderService:
     ) -> list[OrderDto]:
         """Get all orders by customer."""
 
-        await self._customer_service.check_customer_exist(
-            customer_id
-        )
+        await self._customer_service.check_customer_exist(customer_id)
 
-        orders = await self._order_repo.get_orders_by_customer_id(
-            customer_id
-        )
+        orders = await self._order_repo.get_orders_by_customer_id(customer_id)
 
-        return [
-            OrderDto.model_validate(order)
-            for order in orders
-        ]
+        return [OrderDto.model_validate(order) for order in orders]
 
     async def list_all_orders(
         self,
@@ -235,10 +206,7 @@ class OrderService:
             limit,
         )
 
-        return [
-            OrderDto.model_validate(order)
-            for order in orders
-        ]
+        return [OrderDto.model_validate(order) for order in orders]
 
     async def update_order(
         self,
@@ -247,9 +215,7 @@ class OrderService:
     ) -> OrderDto:
         """Update order."""
 
-        order = await self._get_existing_order(
-            order_id
-        )
+        order = await self._get_existing_order(order_id)
 
         order.update_information(
             order_status=command.order_status,
@@ -257,9 +223,7 @@ class OrderService:
             shipped_date=command.shipped_date,
         )
 
-        updated = await self._order_repo.update(
-            order
-        )
+        updated = await self._order_repo.update(order)
 
         return OrderDto.model_validate(updated)
 
@@ -269,13 +233,9 @@ class OrderService:
     ) -> OrderDto:
         """Delete order."""
 
-        order = await self._get_existing_order(
-            order_id
-        )
+        order = await self._get_existing_order(order_id)
 
-        await self._order_repo.delete(
-            order_id
-        )
+        await self._order_repo.delete(order_id)
 
         return OrderDto.model_validate(order)
 
@@ -285,8 +245,6 @@ class OrderService:
     ) -> bool:
         """Validate order existence."""
 
-        await self._get_existing_order(
-            order_id
-        )
+        await self._get_existing_order(order_id)
 
         return True

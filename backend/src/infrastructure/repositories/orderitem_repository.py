@@ -44,7 +44,9 @@ class OrderItemRepository(IOrderItemRepository):
         await self._session.refresh(model)
         return self._to_entity(model)
 
-    async def get_order_item_by_order_product_id(self, order_id: int, product_id: int) -> OrderItem | None:
+    async def get_order_item_by_order_product_id(
+        self, order_id: int, product_id: int
+    ) -> OrderItem | None:
         """Return the item for the given (order_id, product_id) pair, or None."""
         result = await self._session.execute(
             select(OrderItemModel).where(
@@ -64,9 +66,7 @@ class OrderItemRepository(IOrderItemRepository):
 
     async def list_all(self, skip: int = 0, limit: int = 100) -> list[OrderItem]:
         """Return a paginated list of all order items."""
-        result = await self._session.execute(
-            select(OrderItemModel).offset(skip).limit(limit)
-        )
+        result = await self._session.execute(select(OrderItemModel).offset(skip).limit(limit))
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def update(self, order_item: OrderItem) -> OrderItem:
@@ -89,7 +89,7 @@ class OrderItemRepository(IOrderItemRepository):
             select(OrderItemModel).where(OrderItemModel.item_id == item_id)
         )
         model = result.scalar_one_or_none()
-        if model: 
+        if model:
             await self._session.delete(model)
             await self._session.flush()
             return True

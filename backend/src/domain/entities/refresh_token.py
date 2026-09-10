@@ -24,8 +24,4 @@ class RefreshToken(BaseEntity):
         return utc_now() >= self.expires_at
 
     def is_valid(self) -> bool:
-        return (
-            not self.is_revoked
-            and not self.is_expired()
-            and self.is_active
-        )
+        return not self.is_revoked and not self.is_expired() and self.is_active

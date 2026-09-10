@@ -8,8 +8,8 @@ from src.api.dependencies.services import (
     get_order_service,
 )
 from src.application.dtos.order_dto import (
-    CreateOrderCommand,
     CheckoutOrderCommand,
+    CreateOrderCommand,
     OrderDto,
     UpdateOrderCommand,
 )
@@ -38,9 +38,7 @@ async def create_order(
 ) -> OrderDto:
     """Create empty pending order."""
 
-    return await order_service.create_order(
-        command
-    )
+    return await order_service.create_order(command)
 
 
 @router.post(
@@ -96,9 +94,7 @@ async def get_orders_by_customer(
 ) -> list[OrderDto]:
     """Get orders by customer."""
 
-    return await order_service.get_orders_by_customer_id(
-        customer_id
-    )
+    return await order_service.get_orders_by_customer_id(customer_id)
 
 
 @router.get(
@@ -114,9 +110,7 @@ async def get_order(
 ) -> OrderDto:
     """Get order by id."""
 
-    return await order_service.get_order_by_id(
-        order_id
-    )
+    return await order_service.get_order_by_id(order_id)
 
 
 @router.put(
@@ -152,6 +146,4 @@ async def delete_order(
 ) -> OrderDto:
     """Delete order."""
 
-    return await order_service.delete_order(
-        order_id
-    )
+    return await order_service.delete_order(order_id)

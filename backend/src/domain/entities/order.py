@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import IntEnum
+
 from .base_entity import BaseEntity, utc_now
 
 
@@ -19,9 +20,7 @@ class Order(BaseEntity):
     """Order domain entity."""
 
     customer_id: int
-    order_status: OrderStatus = (
-        OrderStatus.PENDING
-    )
+    order_status: OrderStatus = OrderStatus.PENDING
     required_date: datetime | None = None
     store_id: int | None
     staff_id: int | None

@@ -24,9 +24,7 @@ async def test_create_brand_returns_201_and_persists(client, db_session):
     assert "updated_at" in data
 
     row = (
-        await db_session.execute(
-            select(BrandModel).where(BrandModel.brand_id == data["brand_id"])
-        )
+        await db_session.execute(select(BrandModel).where(BrandModel.brand_id == data["brand_id"]))
     ).scalar_one()
     assert row.brand_name == "Trek"
 
@@ -163,9 +161,7 @@ async def test_delete_inactive_brand_returns_200(client, db_session):
     assert response.status_code == 200
 
     row = (
-        await db_session.execute(
-            select(BrandModel).where(BrandModel.brand_id == brand_id)
-        )
+        await db_session.execute(select(BrandModel).where(BrandModel.brand_id == brand_id))
     ).scalar_one_or_none()
     assert row is None
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+
 from src.domain.entities.stock import Stock
-from typing import List, Optional
 
 
 class IStockRepository(ABC):
@@ -12,22 +12,22 @@ class IStockRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_stock_by_id(self, store_id: int, product_id: int) -> Optional[Stock]:
+    async def get_stock_by_id(self, store_id: int, product_id: int) -> Stock | None:
         """Return the stock record for the given (store_id, product_id) pair, or None."""
         pass
 
     @abstractmethod
-    async def get_stock_by_product_id(self, product_id: int) -> List[Stock]:
+    async def get_stock_by_product_id(self, product_id: int) -> list[Stock]:
         """Return all stock records for the given product across all stores."""
         pass
 
     @abstractmethod
-    async def get_stock_by_store_id(self, store_id: int) -> List[Stock]:
+    async def get_stock_by_store_id(self, store_id: int) -> list[Stock]:
         """Return all stock records for the given store across all products."""
         pass
 
     @abstractmethod
-    async def list_all(self, skip: int = 0, limit: int = 100) -> List[Stock]:
+    async def list_all(self, skip: int = 0, limit: int = 100) -> list[Stock]:
         """Return a paginated list of all stock records."""
         pass
 

@@ -80,9 +80,7 @@ class AuthService:
 
         created_user = await self._user_repo.create(user)
 
-        return RegisterResponseDTO(
-            user=UserDTO.model_validate(created_user)
-        )
+        return RegisterResponseDTO(user=UserDTO.model_validate(created_user))
 
     async def login(
         self,
@@ -103,14 +101,10 @@ class AuthService:
             raise InvalidCredentialsException()
 
         if user.user_id is None:
-            raise BusinessRuleViolationError(
-                "Persisted user must have user_id"
-            )
+            raise BusinessRuleViolationError("Persisted user must have user_id")
 
         if not user.is_valid_for_login():
-            raise InvalidAccountStatusException(
-                user.user_id
-            )
+            raise InvalidAccountStatusException(user.user_id)
 
         access_token = create_access_token(
             user.user_id,
@@ -124,10 +118,7 @@ class AuthService:
         refresh_token = RefreshToken(
             user_id=user.user_id,
             token_hash=hash_token(raw_refresh_token),
-            expires_at=(
-                utc_now()
-                + timedelta(days=settings.auth.refresh_token_expire_days)
-            ),
+            expires_at=(utc_now() + timedelta(days=settings.auth.refresh_token_expire_days)),
         )
 
         await self._token_repo.save(refresh_token)
@@ -157,17 +148,13 @@ class AuthService:
 
         token_hash = hash_token(raw_refresh_token)
 
-        stored_token = await self._token_repo.get_by_hash(
-            token_hash
-        )
+        stored_token = await self._token_repo.get_by_hash(token_hash)
 
         if not stored_token:
             raise TokenInvalidError()
 
         if stored_token.user_id is None:
-            raise BusinessRuleViolationError(
-                "Persisted refresh token must have user_id"
-            )
+            raise BusinessRuleViolationError("Persisted refresh token must have user_id")
 
         if stored_token.is_revoked:
             raise SecurityBreachException(
@@ -178,9 +165,7 @@ class AuthService:
         if stored_token.is_expired():
             raise TokenExpiredException()
 
-        user = await self._user_repo.get_by_id(
-            stored_token.user_id
-        )
+        user = await self._user_repo.get_by_id(stored_token.user_id)
 
         if not user:
             raise EntityNotFoundError(
@@ -189,39 +174,24 @@ class AuthService:
             )
 
         if user.user_id is None:
-            raise BusinessRuleViolationError(
-                "Persisted user must have user_id"
-            )
+            raise BusinessRuleViolationError("Persisted user must have user_id")
 
         if not user.is_valid_for_login():
-            raise InvalidAccountStatusException(
-                user.user_id
-            )
+            raise InvalidAccountStatusException(user.user_id)
 
         # Rotate old refresh token
-        await self._token_repo.revoke_by_hash(
-            token_hash
-        )
+        await self._token_repo.revoke_by_hash(token_hash)
 
         # Generate new refresh token
-        new_raw_refresh_token = create_refresh_token(
-            user.user_id
-        )
+        new_raw_refresh_token = create_refresh_token(user.user_id)
 
         new_refresh_token = RefreshToken(
             user_id=user.user_id,
-            token_hash=hash_token(
-                new_raw_refresh_token
-            ),
-            expires_at=(
-                utc_now()
-                + timedelta(days=settings.auth.refresh_token_expire_days)
-            ),
+            token_hash=hash_token(new_raw_refresh_token),
+            expires_at=(utc_now() + timedelta(days=settings.auth.refresh_token_expire_days)),
         )
 
-        await self._token_repo.save(
-            new_refresh_token
-        )
+        await self._token_repo.save(new_refresh_token)
 
         return RefreshTokenResponseDTO(
             token_pair=TokenPairDTO(
@@ -242,9 +212,7 @@ class AuthService:
 
         token_hash = hash_token(raw_refresh_token)
 
-        await self._token_repo.revoke_by_hash(
-            token_hash
-        )
+        await self._token_repo.revoke_by_hash(token_hash)
 
     async def logout_all_devices(
         self,
@@ -252,6 +220,4 @@ class AuthService:
     ) -> None:
         """Logout all user devices."""
 
-        await self._token_repo.revoke_all_by_user(
-            user_id
-        )
+        await self._token_repo.revoke_all_by_user(user_id)

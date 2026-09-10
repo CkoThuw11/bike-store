@@ -1,14 +1,14 @@
 from src.application.dtos.order_item_dto import (
-    OrderItemDto,
     CreateOrderItemCommand,
+    OrderItemDto,
     UpdateOrderItemCommand,
 )
 from src.application.services.order_service import OrderService
 from src.application.services.product_service import ProductService
 from src.domain.entities.order_item import OrderItem
 from src.domain.exceptions import (
-    EntityNotFoundError,
     DomainValidationException,
+    EntityNotFoundError,
 )
 from src.domain.repositories.orderitem_repository import IOrderItemRepository
 
@@ -32,14 +32,10 @@ class OrderItemService:
     ) -> OrderItemDto:
         """Create order item."""
 
-        await self._order_service.check_order_exist(
-            command.order_id
-        )
+        await self._order_service.check_order_exist(command.order_id)
 
-        product = await self._product_service.get_product_by_id(
-            command.product_id
-        )
-        
+        product = await self._product_service.get_product_by_id(command.product_id)
+
         order_item = OrderItem(
             order_id=command.order_id,
             product_id=command.product_id,
@@ -48,10 +44,7 @@ class OrderItemService:
             discount=command.discount,
         )
 
-        created = await self._order_item_repo.create(
-            order_item
-        )
-
+        created = await self._order_item_repo.create(order_item)
 
         return OrderItemDto.model_validate(created)
 
@@ -84,18 +77,11 @@ class OrderItemService:
     ) -> list[OrderItemDto]:
         """Return all order items for order."""
 
-        await self._order_service.check_order_exist(
-            order_id
-        )
+        await self._order_service.check_order_exist(order_id)
 
-        items = await self._order_item_repo.get_order_items_by_order_id(
-            order_id
-        )
+        items = await self._order_item_repo.get_order_items_by_order_id(order_id)
 
-        return [
-            OrderItemDto.model_validate(item)
-            for item in items
-        ]
+        return [OrderItemDto.model_validate(item) for item in items]
 
     async def list_all_order_items(
         self,
@@ -109,10 +95,7 @@ class OrderItemService:
             limit,
         )
 
-        return [
-            OrderItemDto.model_validate(item)
-            for item in items
-        ]
+        return [OrderItemDto.model_validate(item) for item in items]
 
     async def update_order_item(
         self,
@@ -137,17 +120,13 @@ class OrderItemService:
             )
 
         if not command.model_fields_set:
-            raise DomainValidationException(
-                "At least one field must be provided for update"
-            )
+            raise DomainValidationException("At least one field must be provided for update")
 
         item.update_information(
             quantity=command.quantity,
         )
 
-        updated = await self._order_item_repo.update(
-            item
-        )
+        updated = await self._order_item_repo.update(item)
 
         return OrderItemDto.model_validate(updated)
 
@@ -174,8 +153,6 @@ class OrderItemService:
         if item.item_id is None:
             raise EntityNotFoundError("OrderItem", {"order_id": order_id, "product_id": product_id})
 
-        await self._order_item_repo.delete(
-            item.item_id
-        )
+        await self._order_item_repo.delete(item.item_id)
 
         return OrderItemDto.model_validate(item)

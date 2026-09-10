@@ -1,5 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator
+
 from src.domain.entities.user import Role
+
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -72,7 +74,7 @@ class RegisterResponse(BaseModel):
                     "email": "john@example.com",
                     "role": "CUSTOMER",
                     "is_active": True,
-                }
+                },
             }
         }
     }
@@ -113,11 +115,7 @@ class RefreshResponse(BaseModel):
 class MessageResponse(BaseModel):
     message: str
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {"message": "Logged out successfully"}
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"message": "Logged out successfully"}}}
 
 
 class ErrorResponse(BaseModel):

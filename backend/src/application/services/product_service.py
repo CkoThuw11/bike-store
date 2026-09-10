@@ -1,20 +1,17 @@
 from src.application.dtos.product_dto import (
-    ProductDto,
     CreateProductCommand,
+    ProductDto,
     UpdateProductCommand,
 )
 from src.application.services.brand_service import BrandService
 from src.application.services.category_service import CategoryService
-
 from src.domain.entities.product import Product
 from src.domain.entities.stock import Stock
-
 from src.domain.exceptions import (
     BusinessRuleViolationError,
     EntityAlreadyExistsException,
     EntityNotFoundError,
 )
-
 from src.domain.repositories.product_repository import IProductRepository
 from src.domain.repositories.stock_repository import IStockRepository
 from src.domain.repositories.store_repository import IStoreRepository
@@ -54,9 +51,7 @@ class ProductService:
         await self._brand_service.check_brand_exist(command.brand_id)
         await self._category_service.check_category_exist(command.category_id)
 
-        existing = await self._product_repo.get_product_by_name(
-            command.product_name
-        )
+        existing = await self._product_repo.get_product_by_name(command.product_name)
 
         if existing:
             raise EntityAlreadyExistsException(
@@ -65,16 +60,14 @@ class ProductService:
             )
 
         if command.list_price <= 0:
-            raise BusinessRuleViolationError(
-                "Product price must be greater than 0."
-            )
+            raise BusinessRuleViolationError("Product price must be greater than 0.")
 
         product = Product(
             product_name=command.product_name,
             brand_id=command.brand_id,
             category_id=command.category_id,
             model_year=command.model_year,
-            list_price=command.list_price
+            list_price=command.list_price,
         )
 
         created = await self._product_repo.create(product)
@@ -132,10 +125,7 @@ class ProductService:
 
         products = await self._product_repo.list_all(skip, limit)
 
-        return [
-            ProductDto.model_validate(product)
-            for product in products
-        ]
+        return [ProductDto.model_validate(product) for product in products]
 
     async def update_product(
         self,
@@ -151,10 +141,8 @@ class ProductService:
         if not product:
             raise EntityNotFoundError("Product", product_id)
 
-        if (command.product_name and command.product_name != product.product_name):
-            conflicting = await self._product_repo.get_product_by_name(
-                command.product_name
-            )
+        if command.product_name and command.product_name != product.product_name:
+            conflicting = await self._product_repo.get_product_by_name(command.product_name)
 
             if conflicting:
                 raise EntityAlreadyExistsException(
@@ -162,29 +150,14 @@ class ProductService:
                     command.product_name,
                 )
 
-        if (
-            command.brand_id
-            and command.brand_id != product.brand_id
-        ):
-            await self._brand_service.check_brand_exist(
-                command.brand_id
-            )
+        if command.brand_id and command.brand_id != product.brand_id:
+            await self._brand_service.check_brand_exist(command.brand_id)
 
-        if (
-            command.category_id
-            and command.category_id != product.category_id
-        ):
-            await self._category_service.check_category_exist(
-                command.category_id
-            )
+        if command.category_id and command.category_id != product.category_id:
+            await self._category_service.check_category_exist(command.category_id)
 
-        if (
-            command.list_price is not None
-            and command.list_price <= 0
-        ):
-            raise BusinessRuleViolationError(
-                "Product price must be greater than 0."
-            )
+        if command.list_price is not None and command.list_price <= 0:
+            raise BusinessRuleViolationError("Product price must be greater than 0.")
 
         product.update_information(
             product_name=command.product_name,
@@ -211,16 +184,14 @@ class ProductService:
             raise EntityNotFoundError("Product", product_id)
 
         if not product.is_active:
-            raise BusinessRuleViolationError(
-                f"Product '{product_id}' is already deactivated."
-            )
+            raise BusinessRuleViolationError(f"Product '{product_id}' is already deactivated.")
 
         product.deactivate()
 
         updated = await self._product_repo.update(product)
 
         return ProductDto.model_validate(updated)
-    
+
     async def activate_product(
         self,
         product_id: int,
@@ -239,21 +210,26 @@ class ProductService:
         updated = await self._product_repo.update(product)
 
         return ProductDto.model_validate(updated)
-    
+
     async def delete_product(
         self,
         product_id: int,
     ) -> ProductDto:
-        """
-        Hard delete product.
-
-        Use carefully.
-        """
+        """Hard-delete a product; raises 422 if it is still active."""
 
         product = await self._product_repo.get_product_by_id(product_id)
 
         if not product:
             raise EntityNotFoundError("Product", product_id)
+
+        if product.is_active:
+            raise BusinessRuleViolationError(
+                f"Product '{product.product_name}' is active and cannot be deleted. "
+                "Deactivate it first."
+            )
+
+        for stock in await self._stock_repo.get_stock_by_product_id(product_id):
+            await self._stock_repo.delete(stock.store_id, product_id)
 
         await self._product_repo.delete(product_id)
 

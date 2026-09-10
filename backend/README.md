@@ -8,7 +8,7 @@ FastAPI backend for a bike store management system using Clean Architecture, asy
 - **Database:** PostgreSQL 16 with async SQLAlchemy and asyncpg
 - **Architecture:** API → Application → Domain ← Infrastructure
 - **Auth:** JWT access tokens, refresh-token rotation, HttpOnly refresh cookie
-- **Data:** `db/init.sql` — schema + seed data, auto-run by Postgres on first start
+- **Data:** Schema created by Alembic migrations; `db/seed_dev_data.sql` — optional demo data for local dev
 - **Containers:** Dockerfile + Docker Compose
 
 ## 🧱 Architecture
@@ -50,9 +50,9 @@ Full conventions (SOLID, SRP, exception handling, layering rules) live in [`AGEN
 
 ```text
 BackendEngineering/
-├── alembic/                 # Migration environment (auto-applied on app startup)
+├── alembic/                 # Migration environment (applied by the `migrate` service before backend starts)
 ├── db/
-│   └── init.sql             # Schema + seed data, auto-run by Postgres on first start
+│   └── seed_dev_data.sql    # Optional demo data for local dev, applied manually
 ├── src/
 │   ├── api/                 # Routes, dependencies, exception handlers
 │   ├── application/         # DTOs, services, auth/password/token helpers
@@ -114,7 +114,13 @@ Starts:
 - Health: `http://localhost:8000/health`
 - PostgreSQL: `${DATABASE_PORT}:5432`
 
-On first start (empty `pgdata` volume), Postgres automatically runs `db/init.sql`, which creates the schema and seeds all data. This only happens once per volume — to re-seed, remove the volume first (`docker compose down -v`).
+A one-shot `migrate` service runs `alembic upgrade head` and must complete successfully before `backend` starts — this creates the schema. To load demo data on top, apply it manually:
+
+```bash
+docker exec -i -e PGPASSWORD=postgres bike-store-db psql -U postgres -d bike_store < db/seed_dev_data.sql
+```
+
+(values above match `.env.example`'s defaults — adjust if your `.env` differs)
 
 ### Local Python
 
@@ -122,7 +128,8 @@ On first start (empty `pgdata` volume), Postgres automatically runs `db/init.sql
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-psql -h localhost -U $DATABASE_USER -d $DATABASE_NAME -f db/init.sql
+alembic upgrade head
+PGPASSWORD=postgres psql -h localhost -U postgres -d bike_store -f db/seed_dev_data.sql  # optional demo data
 uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -171,18 +178,17 @@ Use Swagger UI at `/docs` for exact methods and request/response schemas.
 
 ## 🌱 Seed Data
 
-`db/init.sql` creates the schema and seeds brands, categories, customers, stores, staff, products, orders, order items, and stock, plus two demo users (see below). It was originally generated from a CSV dataset; those source files have since been removed now that `init.sql` is the single source of truth.
+Schema is created by Alembic migrations (`alembic upgrade head`), not by a SQL bootstrap script. `db/seed_dev_data.sql` is optional and dev-only — it loads sample brands, categories, customers, stores, staff, products, orders, order items, and stock, plus one demo admin user (see below). It is never run automatically; apply it manually and never against staging/production.
 
-Seeded accounts (password `123456789` for both):
+Seeded account (password `123456789`):
 
 | Email | Username | Role |
 | --- | --- | --- |
 | `admin@gmail.com` | `admin` | ADMIN |
-| `customer@gmail.com` | `customer` | CUSTOMER |
 
 ## ⚠️ Known Notes
 
-- Database migrations are automatically managed and applied on application startup using Alembic.
+- Database migrations run via a separate one-shot `migrate` service (`alembic upgrade head`), gated before `backend` starts — the API container itself does not run migrations.
 - Context-aware structured logging is implemented using `structlog` (outputs console-colored text in development and JSON in production), configured via `APP_DEBUG`/`LOG_LEVEL`/`LOG_FORMAT`.
 - Tests are split into three tiers (`pytest.ini` markers): `unit` (no external services), `integration` (PostgreSQL via testcontainers), `e2e` (full HTTP contract tests). Run them individually via `pytest -m unit`, `pytest -m integration`, `pytest -m e2e`.
 

@@ -11,6 +11,7 @@ from src.domain.exceptions import (
 )
 from src.domain.repositories.category_repository import ICategoryRepository
 
+
 class CategoryService:
     """Orchestrates all business logic related to product categories."""
 
@@ -63,9 +64,12 @@ class CategoryService:
         if not category:
             raise EntityNotFoundError("Category", category_id)
 
-        if command.category_name and command.category_name != category.category_name:
-            if await self._category_repo.get_category_by_name(command.category_name):
-                raise EntityAlreadyExistsException("Category", command.category_name)
+        if (
+            command.category_name
+            and command.category_name != category.category_name
+            and await self._category_repo.get_category_by_name(command.category_name)
+        ):
+            raise EntityAlreadyExistsException("Category", command.category_name)
 
         category.update_information(category_name=command.category_name)
         updated = await self._category_repo.update(category)

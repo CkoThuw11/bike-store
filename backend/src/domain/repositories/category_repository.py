@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+
 from src.domain.entities.category import Category
-from typing import List, Optional
+
 
 class ICategoryRepository(ABC):
     """Contract for Category persistence operations."""
@@ -11,17 +12,17 @@ class ICategoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_category_by_id(self, category_id: int) -> Optional[Category]:
+    async def get_category_by_id(self, category_id: int) -> Category | None:
         """Return the category with the given ID, or None if not found."""
         pass
 
     @abstractmethod
-    async def get_category_by_name(self, category_name: str) -> Optional[Category]:
+    async def get_category_by_name(self, category_name: str) -> Category | None:
         """Return the category with the given name, or None if not found."""
         pass
 
     @abstractmethod
-    async def list_all(self, skip: int = 0, limit: int = 100) -> List[Category]:
+    async def list_all(self, skip: int = 0, limit: int = 100) -> list[Category]:
         """Return a paginated list of all categories."""
         pass
 

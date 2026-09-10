@@ -67,9 +67,7 @@ class StockRepository(IStockRepository):
 
     async def list_all(self, skip: int = 0, limit: int = 100) -> list[Stock]:
         """Return a paginated list of all stock records."""
-        result = await self._session.execute(
-            select(StockModel).offset(skip).limit(limit)
-        )
+        result = await self._session.execute(select(StockModel).offset(skip).limit(limit))
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def update(self, stock: Stock) -> Stock:
@@ -96,7 +94,7 @@ class StockRepository(IStockRepository):
             )
         )
         model = result.scalar_one_or_none()
-        if model: 
+        if model:
             await self._session.delete(model)
             await self._session.flush()
             return True

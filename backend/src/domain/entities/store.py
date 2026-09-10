@@ -8,12 +8,12 @@ class Store(BaseEntity):
     """Store domain entity representing a physical location."""
 
     store_name: str
-    phone: str 
-    email: str 
-    street: str 
-    city: str 
-    state: str 
-    zip_code: str 
+    phone: str
+    email: str
+    street: str
+    city: str
+    state: str
+    zip_code: str
     is_active: bool = True
     store_id: int | None = field(default=None)
 
@@ -35,7 +35,7 @@ class Store(BaseEntity):
         street: str | None = None,
         city: str | None = None,
         state: str | None = None,
-        zip_code: str | None = None
+        zip_code: str | None = None,
     ) -> None:
         """Apply partial store information updates."""
         self.apply_updates(
@@ -45,5 +45,5 @@ class Store(BaseEntity):
             street=street,
             city=city,
             state=state,
-            zip_code=zip_code
+            zip_code=zip_code,
         )

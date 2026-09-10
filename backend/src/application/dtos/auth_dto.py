@@ -47,7 +47,6 @@ class LogoutCommand(BaseModel):
     refresh_token: str
 
 
-
 class UserDTO(BaseModel):
     """User response DTO."""
 

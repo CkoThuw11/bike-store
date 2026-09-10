@@ -1,13 +1,11 @@
-import asyncio
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from alembic import command
-from alembic.config import Config
+import structlog
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-import structlog
 
 from src.api.exception_handlers import register_exception_handlers
 from src.api.routes import (
@@ -26,26 +24,15 @@ from src.core.logging_config import setup_logging
 from src.core.middleware import RequestLoggingMiddleware
 from src.infrastructure.configs import settings
 from src.infrastructure.connection import engine, get_db
-from src.infrastructure.database.models import Base
 
 setup_logging(settings.app.log_level, settings.app.log_format)
 logger = structlog.get_logger(__name__)
 
 
-def run_alembic_migrations() -> None:
-    """Runs Alembic migrations programmatically."""
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
-
-
 # --- Lifespan ---
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("Starting application...")
-
-    logger.info("Running database migrations...")
-    await asyncio.to_thread(run_alembic_migrations)
-    logger.info("Database migrations completed.")
     yield
 
     logger.info("Shutting down application...")
@@ -92,16 +79,16 @@ app.include_router(stores.router)
 
 # --- Health & Readiness ---
 @app.get("/health", include_in_schema=True, tags=["Health"])
-async def health_check():
+async def health_check() -> dict:
     """Liveness probe — always returns ok if the process is up."""
     return {"status": "ok"}
 
 
 @app.get("/ready", include_in_schema=True, tags=["Health"])
-async def readiness_check(session: AsyncSession = Depends(get_db)):
+async def readiness_check(session: AsyncSession = Depends(get_db)) -> dict:
     """Readiness probe — verifies database connectivity."""
     try:
         await session.execute(text("SELECT 1"))
         return {"status": "ready"}
-    except Exception:
-        raise HTTPException(status_code=503, detail="Database unavailable")
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Database unavailable") from exc
