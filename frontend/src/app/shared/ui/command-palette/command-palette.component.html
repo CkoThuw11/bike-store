@@ -1,0 +1,53 @@
+@if (open()) {
+  <div class="cmdk-backdrop" (click)="close()" aria-hidden="true"></div>
+
+  <div class="cmdk-modal" role="dialog" aria-label="Command palette">
+    <div class="cmdk-modal__search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        class="cmdk-modal__input"
+        placeholder="Search or jump to..."
+        autocomplete="off"
+        autofocus
+        [value]="query()"
+        (input)="setQuery($any($event.target).value)"
+        aria-label="Command palette search"
+      />
+      <kbd class="cmdk-modal__esc">Esc</kbd>
+    </div>
+
+    <div class="cmdk-modal__list" role="listbox">
+      @if (filtered().length === 0) {
+        <p class="cmdk-modal__empty">No matches.</p>
+      }
+      @for (group of grouped(); track group.section) {
+        <p class="cmdk-modal__section">{{ group.section }}</p>
+        @for (cmd of group.items; track cmd.id; let i = $index) {
+          <button
+            type="button"
+            class="cmdk-modal__item"
+            [class.cmdk-modal__item--active]="globalIndex(group.section, i) === activeIndex()"
+            (mouseenter)="activeIndex.set(globalIndex(group.section, i))"
+            (click)="selectByIndex(globalIndex(group.section, i))"
+            role="option"
+            [attr.aria-selected]="globalIndex(group.section, i) === activeIndex()"
+          >
+            <span class="cmdk-modal__label">{{ cmd.label }}</span>
+            <span class="cmdk-modal__hint">{{ cmd.hint }}</span>
+          </button>
+        }
+      }
+    </div>
+
+    <div class="cmdk-modal__footer">
+      <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+      <span><kbd>↵</kbd> select</span>
+      <span><kbd>Esc</kbd> close</span>
+    </div>
+  </div>
+}

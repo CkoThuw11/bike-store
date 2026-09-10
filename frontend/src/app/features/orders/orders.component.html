@@ -1,0 +1,108 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Orders</h2>
+      <p class="page-subtitle">Review order state, dates, and checkout progress.</p>
+    </div>
+    <a routerLink="/orders/new" class="btn btn-primary">Create Order</a>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <input class="form-control" type="search" placeholder="Search by order or customer" [ngModel]="query()" (ngModelChange)="setQuery($event)" />
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <select class="form-select" [ngModel]="statusFilter()" (ngModelChange)="setStatusFilter($event)">
+          <option value="all">All statuses</option>
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ statusLabel(status) }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-lg-auto ms-lg-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCsv()">Export CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) { <div class="error-state mb-3">{{ error() }}</div> }
+
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">{{ filtered().length }} orders</h3>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-border text-primary"></div><span>Loading orders...</span></div>
+    } @else if (filtered().length === 0) {
+      <div class="empty-state"><strong>No orders found</strong><span>Create an order to start checkout.</span></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover vs-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Order Date</th>
+              <th>Required</th>
+              <th>Shipped</th>
+              <th>Store / Staff</th>
+              <th class="action-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of paginated(); track order.order_id) {
+              <tr>
+                <td><span class="entity-name">#{{ order.order_id }}</span></td>
+                <td>{{ customerName(order.customer_id) }}</td>
+                <td><span class="order-badge" [attr.data-status]="order.order_status">{{ statusLabel(order.order_status) }}</span></td>
+                <td>{{ formatDate(order.order_date) }}</td>
+                <td class="muted-text">{{ formatDate(order.required_date) }}</td>
+                <td class="muted-text">{{ formatDate(order.shipped_date) }}</td>
+                <td class="muted-text">Store #{{ order.store_id }} / Staff #{{ order.staff_id }}</td>
+                <td class="action-cell">
+                  <div class="d-flex align-items-center gap-2">
+                    <select class="form-select form-select-sm status-select" [disabled]="savingId() === order.order_id" [ngModel]="order.order_status" (ngModelChange)="updateStatus(order, $event)">
+                      @for (status of statuses; track status) {
+                        <option [ngValue]="status">{{ statusLabel(status) }}</option>
+                      }
+                    </select>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (filtered().length > pageSize) {
+        <div class="pagination-footer">
+          <div class="pagination-summary">Showing {{ pageStart() }}-{{ pageEnd() }} of {{ filtered().length }}</div>
+          <nav aria-label="Orders pagination">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" type="button" [disabled]="currentPage() === 1" (click)="goToPage(1)">First</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" type="button" [disabled]="currentPage() === 1" (click)="previousPage()">Previous</button>
+              </li>
+              @for (page of visiblePages(); track page) {
+                <li class="page-item" [class.active]="page === currentPage()">
+                  <button class="page-link" type="button" (click)="goToPage(page)">{{ page }}</button>
+                </li>
+              }
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" type="button" [disabled]="currentPage() === totalPages()" (click)="nextPage()">Next</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" type="button" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())">Last</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      }
+    }
+  </div>
+</section>

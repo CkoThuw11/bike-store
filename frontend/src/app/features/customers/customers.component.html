@@ -1,0 +1,160 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Customers</h2>
+      <p class="page-subtitle">Keep customer contact records ready for order creation.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">Add Customer</button>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-6">
+        <input class="form-control" type="search" placeholder="Search customers" [ngModel]="query()" (ngModelChange)="setQuery($event)" />
+      </div>
+      <div class="col-12 col-md-auto ms-md-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCsv()">Export CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) { <div class="error-state mb-3">{{ error() }}</div> }
+  @if (feedback(); as modal) {
+    <div class="vs-drawer-backdrop" (click)="closeFeedback()"></div>
+    <div class="feedback-modal" role="dialog" aria-modal="true">
+      <div [class]="'feedback-icon feedback-icon--' + modal.kind"></div>
+      <h3>{{ modal.title }}</h3>
+      <p>{{ modal.message }}</p>
+      <button class="btn btn-primary" type="button" (click)="closeFeedback()">OK</button>
+    </div>
+  }
+
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">{{ filtered().length }} customers</h3>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-border text-primary"></div><span>Loading customers...</span></div>
+    } @else if (filtered().length === 0) {
+      <div class="empty-state"><strong>No customers found</strong><span>Adjust search or add a new customer.</span></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover vs-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th class="action-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (customer of paginated(); track customer.customer_id) {
+              <tr>
+                <td><span class="entity-name">#{{ customer.customer_id }}</span></td>
+                <td><span class="entity-name">{{ customer.first_name }} {{ customer.last_name }}</span></td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phone || 'No phone' }}</td>
+                <td>{{ customer.city }}, {{ customer.state }}</td>
+                <td><span [class]="customer.is_active ? 'badge-active' : 'badge-inactive'">{{ customer.is_active ? 'Active' : 'Inactive' }}</span></td>
+                <td class="action-cell">
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" type="button" (click)="openEdit(customer)">Edit</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" (click)="toggleActive(customer)">{{ customer.is_active ? 'Deactivate' : 'Activate' }}</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (filtered().length > pageSize) {
+        <div class="pagination-footer">
+          <div class="pagination-summary">Showing {{ pageStart() }}-{{ pageEnd() }} of {{ filtered().length }}</div>
+          <nav aria-label="Customers pagination">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" type="button" [disabled]="currentPage() === 1" (click)="goToPage(1)">First</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" type="button" [disabled]="currentPage() === 1" (click)="previousPage()">Previous</button>
+              </li>
+              @for (page of visiblePages(); track page) {
+                <li class="page-item" [class.active]="page === currentPage()">
+                  <button class="page-link" type="button" (click)="goToPage(page)">{{ page }}</button>
+                </li>
+              }
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" type="button" [disabled]="currentPage() === totalPages()" (click)="nextPage()">Next</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" type="button" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())">Last</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      }
+    }
+  </div>
+</section>
+
+@if (drawerOpen()) {
+  <div class="vs-drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside class="vs-drawer open">
+    <div class="drawer-header d-flex align-items-center justify-content-between">
+      <h3 class="table-card__title">{{ editing() ? 'Edit Customer' : 'Add Customer' }}</h3>
+      <button class="btn-close" type="button" aria-label="Close" (click)="closeDrawer()"></button>
+    </div>
+    <form class="drawer-body" [formGroup]="form" (ngSubmit)="save()">
+      @if (actionError()) { <div class="alert alert-danger">{{ actionError() }}</div> }
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label" for="customer-first">First name</label>
+          <input id="customer-first" class="form-control" formControlName="first_name" />
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="customer-last">Last name</label>
+          <input id="customer-last" class="form-control" formControlName="last_name" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="customer-email">Email</label>
+        <input id="customer-email" class="form-control" type="email" formControlName="email" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="customer-phone">Phone</label>
+        <input id="customer-phone" class="form-control" formControlName="phone" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="customer-street">Street</label>
+        <input id="customer-street" class="form-control" formControlName="street" />
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="form-label" for="customer-city">City</label>
+          <input id="customer-city" class="form-control" formControlName="city" />
+        </div>
+        <div class="col-3">
+          <label class="form-label" for="customer-state">State</label>
+          <input id="customer-state" class="form-control" formControlName="state" />
+        </div>
+        <div class="col-3">
+          <label class="form-label" for="customer-zip">ZIP</label>
+          <input id="customer-zip" class="form-control" formControlName="zip_code" />
+        </div>
+      </div>
+    </form>
+    <div class="drawer-footer d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="closeDrawer()">Cancel</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+        Save
+      </button>
+    </div>
+  </aside>
+}

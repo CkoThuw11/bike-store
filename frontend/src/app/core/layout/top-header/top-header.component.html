@@ -1,0 +1,91 @@
+<header class="top-header">
+  <div class="top-header__main">
+    <nav class="top-header__crumbs" aria-label="Breadcrumb">
+      @for (crumb of breadcrumbs(); track $index; let last = $last) {
+        @if (crumb.route && !last) {
+          <a [routerLink]="crumb.route" class="top-header__crumb-link">{{ crumb.label }}</a>
+        } @else {
+          <span class="top-header__crumb" [class.top-header__crumb--current]="last">{{ crumb.label }}</span>
+        }
+        @if (!last) {
+          <span class="top-header__crumb-sep" aria-hidden="true">›</span>
+        }
+      }
+    </nav>
+    <h1 class="top-header__title">{{ pageTitle() }}</h1>
+  </div>
+
+  <div class="top-header__actions">
+    <button
+      type="button"
+      class="top-header__search"
+      (click)="openPalette()"
+      aria-label="Open command palette"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <span>Search…</span>
+      <kbd>{{ metaKeyLabel }}K</kbd>
+    </button>
+
+    <div class="top-header__bell-wrap">
+      <button
+        type="button"
+        class="top-header__icon-btn"
+        (click)="toggleBell()"
+        aria-label="Notifications"
+        [attr.aria-expanded]="bellOpen()"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        @if (lowStockCount() > 0) {
+          <span class="top-header__bell-dot" aria-hidden="true"></span>
+        }
+      </button>
+      @if (bellOpen()) {
+        <div class="top-header__popover">
+          <p class="top-header__popover-title">Alerts</p>
+          @if (lowStockCount() === 0) {
+            <p class="top-header__popover-empty">No low-stock items. Inventory is healthy.</p>
+          } @else {
+            <p class="top-header__popover-meta">{{ lowStockCount() }} low-stock items (qty &lt; 5)</p>
+            <a routerLink="/stocks" class="btn btn-outline-primary btn-sm" (click)="closeMenus()">
+              Review stock
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="top-header__avatar-wrap">
+      <button
+        type="button"
+        class="top-header__avatar-btn"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        aria-label="Profile menu"
+      >
+        <span class="top-header__avatar">{{ initials() }}</span>
+      </button>
+      @if (menuOpen()) {
+        <div class="top-header__popover top-header__popover--avatar">
+          @if (user(); as u) {
+            <p class="top-header__popover-name">{{ u.fullname }}</p>
+            <p class="top-header__popover-meta">{{ u.email }}</p>
+          }
+          <hr class="top-header__popover-sep" />
+          <a routerLink="/settings" class="top-header__popover-link" (click)="closeMenus()">Profile &amp; settings</a>
+          <button type="button" class="top-header__popover-link top-header__popover-link--danger" (click)="logout()">
+            Sign out
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

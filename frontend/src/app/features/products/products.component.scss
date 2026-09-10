@@ -1,0 +1,56 @@
+.entity-actions {
+  align-items: center;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+  min-width: 190px;
+
+  .btn:first-child {
+    justify-self: start;
+  }
+
+  .btn:last-child {
+    justify-self: end;
+  }
+}
+
+.feedback-modal {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xl);
+  left: 50%;
+  max-width: 420px;
+  padding: 1.5rem;
+  position: fixed;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 2rem);
+  z-index: 230;
+
+  h3 {
+    color: var(--text-primary);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 900;
+    margin: 0.75rem 0 0.5rem;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.feedback-icon {
+  border-radius: 999px;
+  height: 2.75rem;
+  margin: 0 auto;
+  width: 2.75rem;
+
+  &--success { background: var(--success); }
+  &--inactive { background: var(--text-muted); }
+  &--warning { background: var(--warning); }
+  &--danger { background: var(--danger); }
+}

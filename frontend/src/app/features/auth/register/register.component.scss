@@ -1,0 +1,114 @@
+// src/app/features/auth/register/register.component.scss
+
+// Full-screen gradient background
+.auth-bg {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+// Card surface + slide-up entrance
+.auth-card {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(20px);
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+// Gradient logo text
+.auth-logo-text {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Error banner
+.auth-error {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(239, 71, 111, 0.25);
+  background: rgba(239, 71, 111, 0.08);
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+// Override Bootstrap form-control defaults
+.auth-input.form-control {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  background-color: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12);
+    outline: none;
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &.auth-input--error {
+    border-color: var(--danger);
+
+    &:focus {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(239, 71, 111, 0.12);
+    }
+  }
+}
+
+// Primary submit button — override Bootstrap .btn styles
+.btn-primary.btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35);
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.45);
+    // keep gradient — prevent Bootstrap hover from washing it out
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.35);
+    outline: none;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+// Loading spinner inside button
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

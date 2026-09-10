@@ -1,0 +1,131 @@
+@if (loading()) {
+  <div class="metric-grid mb-4">
+    @for (i of [1,2,3,4,5,6]; track i) {
+      <div class="skeleton"></div>
+    }
+  </div>
+}
+
+@if (error()) {
+  <div class="error-state mb-4">
+    <strong>Unable to load dashboard</strong>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (!loading() && !error()) {
+  <!-- KPI cards -->
+  <div class="metric-grid mb-4">
+    @for (card of statCards(); track card.label) {
+      <a [routerLink]="card.route" class="stat-card" [attr.data-color]="card.color">
+        <div class="stat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <use [attr.href]="'#icon-' + card.icon" />
+          </svg>
+        </div>
+        <div class="stat-body">
+          <p class="stat-value">{{ card.value }}</p>
+          <p class="stat-label">{{ card.label }}</p>
+          @if (card.delta > 0) {
+            <p class="stat-delta stat-delta--up">+{{ card.delta }} this week</p>
+          } @else if (card.delta === 0) {
+            <p class="stat-delta stat-delta--flat">No change this week</p>
+          }
+        </div>
+      </a>
+    }
+  </div>
+
+  <!-- Quick actions strip -->
+  <div class="quick-actions mb-4">
+    <span class="quick-actions__label">Quick actions</span>
+    @for (action of quickActions; track action.label) {
+      <a
+        class="quick-actions__btn"
+        [routerLink]="action.route"
+        [queryParams]="action.queryParams"
+        [attr.data-color]="action.color"
+      >
+        <span aria-hidden="true">+</span> {{ action.label }}
+      </a>
+    }
+  </div>
+
+  <!-- Row: recent orders + low-stock -->
+  <div class="dashboard-row">
+    <div class="table-card dashboard-row__main">
+      <div class="table-card__header">
+        <h2 class="table-card__title">Recent Orders</h2>
+        <a routerLink="/orders" class="link-muted-button">View all</a>
+      </div>
+
+      @if (recentOrders().length === 0) {
+        <div class="empty-state">
+          <strong>No orders yet</strong>
+          <span>Create the first order when a customer is ready to check out.</span>
+          <a routerLink="/orders/new" class="btn btn-primary btn-sm">Create order</a>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover vs-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of recentOrders(); track order.order_id) {
+                <tr>
+                  <td><span class="entity-name">#{{ order.order_id }}</span></td>
+                  <td>Customer #{{ order.customer_id }}</td>
+                  <td>
+                    <span class="order-badge" [attr.data-status]="order.order_status">
+                      {{ statusLabel(order.order_status) }}
+                    </span>
+                  </td>
+                  <td class="muted-text">{{ formatDate(order.order_date) }}</td>
+                  <td class="action-cell">
+                    <a routerLink="/orders" class="btn btn-outline-primary btn-sm">View</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="table-card dashboard-row__aside">
+      <div class="table-card__header">
+        <h2 class="table-card__title">Low Stock Alerts</h2>
+        <a routerLink="/stocks" class="link-muted-button">Manage</a>
+      </div>
+
+      @if (lowStock().length === 0) {
+        <div class="empty-state">
+          <strong>All stocked up</strong>
+          <span>No products are below the {{ 5 }}-unit threshold.</span>
+        </div>
+      } @else {
+        <ul class="low-stock-list">
+          @for (row of lowStock(); track row.product_id + '-' + row.store_id) {
+            <li class="low-stock-list__row">
+              <div class="low-stock-list__copy">
+                <p class="low-stock-list__name">{{ row.product_name }}</p>
+                <p class="low-stock-list__meta">Store #{{ row.store_id }}</p>
+              </div>
+              <span class="low-stock-list__qty" [attr.data-critical]="row.quantity === 0">
+                {{ row.quantity }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+}

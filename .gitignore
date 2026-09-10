@@ -1,0 +1,7 @@
+# Root-level environment file
+.env
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

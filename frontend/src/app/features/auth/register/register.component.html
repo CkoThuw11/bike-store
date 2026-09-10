@@ -1,0 +1,144 @@
+<!-- src/app/features/auth/register/register.component.html -->
+<div class="auth-bg d-flex align-items-center justify-content-center min-vh-100 p-3 position-relative overflow-hidden">
+
+  <!-- Decorative circles -->
+  <div class="position-absolute top-0 start-0 w-100 h-100 pe-none">
+    <div class="position-absolute rounded-circle"
+         style="width: 400px; height: 400px; top: -120px; right: -80px; background: rgba(255,255,255,0.08);"></div>
+    <div class="position-absolute rounded-circle"
+         style="width: 250px; height: 250px; bottom: -60px; left: -60px; background: rgba(255,255,255,0.08);"></div>
+    <div class="position-absolute rounded-circle"
+         style="width: 160px; height: 160px; top: 40%; left: 10%; background: rgba(255,255,255,0.06);"></div>
+  </div>
+
+  <!-- Card -->
+  <div class="auth-card position-relative w-100 p-4 p-sm-5" style="max-width: 420px; z-index: 10;">
+
+    <!-- Logo -->
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <span style="font-size: 1.4rem; line-height: 1;">🚲</span>
+      <span class="auth-logo-text fw-black" style="font-family: 'Nunito', sans-serif; font-size: 1.4rem;">BikeShop</span>
+    </div>
+    <p class="mb-4 mt-0" style="font-size: 0.78rem; color: var(--text-muted);">Bike store management</p>
+
+    <h2 class="fw-extrabold mb-1" style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--text-primary);">
+      Create your account
+    </h2>
+    <p class="mb-4" style="font-size: 0.88rem; color: var(--text-muted);">Get started with VeloShop today</p>
+
+    <!-- Error banner -->
+    @if (errorMessage()) {
+      <div class="auth-error d-flex align-items-center gap-2 mb-4">
+        <svg class="flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Full name -->
+      <div class="mb-3">
+        <label for="fullname" class="form-label fw-medium" style="font-size: 0.85rem; color: var(--text-secondary);">
+          Full name
+        </label>
+        <input id="fullname" type="text" formControlName="fullname"
+               placeholder="Jane Smith" autocomplete="name"
+               class="auth-input form-control"
+               [class.auth-input--error]="form.controls.fullname.invalid && form.controls.fullname.touched" />
+        @if (form.controls.fullname.invalid && form.controls.fullname.touched) {
+          <div class="mt-1" style="font-size: 0.78rem; color: var(--danger);">Please enter your full name.</div>
+        }
+      </div>
+
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="username" class="form-label fw-medium" style="font-size: 0.85rem; color: var(--text-secondary);">
+          Username
+        </label>
+        <input id="username" type="text" formControlName="username"
+               placeholder="janesmith" autocomplete="username"
+               class="auth-input form-control"
+               [class.auth-input--error]="form.controls.username.invalid && form.controls.username.touched" />
+        @if (form.controls.username.invalid && form.controls.username.touched) {
+          <div class="mt-1" style="font-size: 0.78rem; color: var(--danger);">Username must be at least 3 characters.</div>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="reg-email" class="form-label fw-medium" style="font-size: 0.85rem; color: var(--text-secondary);">
+          Email address
+        </label>
+        <input id="reg-email" type="email" formControlName="email"
+               placeholder="you@example.com" autocomplete="email"
+               class="auth-input form-control"
+               [class.auth-input--error]="form.controls.email.invalid && form.controls.email.touched" />
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+          <div class="mt-1" style="font-size: 0.78rem; color: var(--danger);">Please enter a valid email address.</div>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4">
+        <label for="reg-password" class="form-label fw-medium" style="font-size: 0.85rem; color: var(--text-secondary);">
+          Password
+        </label>
+        <div class="position-relative">
+          <input id="reg-password"
+                 [type]="showPassword() ? 'text' : 'password'"
+                 formControlName="password"
+                 placeholder="At least 6 characters"
+                 autocomplete="new-password"
+                 class="auth-input form-control pe-5"
+                 [class.auth-input--error]="form.controls.password.invalid && form.controls.password.touched" />
+          <button type="button" tabindex="-1" aria-label="Toggle password visibility"
+                  class="btn border-0 bg-transparent p-0 position-absolute top-50 end-0 translate-middle-y me-3 d-flex align-items-center"
+                  style="color: var(--text-muted); transition: color var(--transition);"
+                  (click)="togglePassword()">
+            @if (showPassword()) {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            } @else {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <div class="mt-1" style="font-size: 0.78rem; color: var(--danger);">Password must be at least 6 characters.</div>
+        }
+      </div>
+
+      <!-- Submit -->
+      <button type="submit"
+              class="btn-primary btn w-100 d-flex align-items-center justify-content-center gap-2 text-white fw-semibold border-0"
+              style="font-family: 'DM Sans', sans-serif; font-size: 0.92rem; padding: 0.75rem;"
+              [disabled]="loading()">
+        @if (loading()) {
+          <span class="btn-spinner"></span>
+          Creating account…
+        } @else {
+          Create account
+        }
+      </button>
+
+    </form>
+
+    <p class="text-center mt-4 mb-0" style="font-size: 0.86rem; color: var(--text-muted);">
+      Already have an account?
+      <a routerLink="/login" class="fw-semibold text-decoration-none" style="color: var(--primary);">Sign in</a>
+    </p>
+
+  </div>
+</div>

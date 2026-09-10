@@ -1,0 +1,27 @@
+# Linter and formatter, mirrors CI lint job (make lint / make format)
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+# Static type analysis, mirrors CI type-check job (make type-check). Advisory: does not block merge.
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+strict = false
+warn_return_any = false
+disallow_untyped_defs = true
+
+# Coverage for the unit suite (make coverage). Gate is 80% today; target is 100% on domain/application.
+[tool.coverage.run]
+source = ["src"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true

@@ -1,0 +1,101 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Categories</h2>
+      <p class="page-subtitle">Organize products into browsable bike catalog groups.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">Add Category</button>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-6">
+        <input class="form-control" type="search" placeholder="Search categories" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+      </div>
+      <div class="col-12 col-md-auto ms-md-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCsv()">Export CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="error-state mb-3">{{ error() }}</div>
+  }
+  @if (feedback(); as modal) {
+    <div class="vs-drawer-backdrop" (click)="closeFeedback()"></div>
+    <div class="feedback-modal" role="dialog" aria-modal="true">
+      <div [class]="'feedback-icon feedback-icon--' + modal.kind"></div>
+      <h3>{{ modal.title }}</h3>
+      <p>{{ modal.message }}</p>
+      <button class="btn btn-primary" type="button" (click)="closeFeedback()">OK</button>
+    </div>
+  }
+
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">{{ filtered().length }} categories</h3>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-border text-primary"></div><span>Loading categories...</span></div>
+    } @else if (filtered().length === 0) {
+      <div class="empty-state"><strong>No categories found</strong><span>Adjust the search or add a new category.</span></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover vs-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th class="action-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filtered(); track item.category_id) {
+              <tr>
+                <td><span class="entity-name">#{{ item.category_id }}</span></td>
+                <td><span class="entity-name">{{ item.category_name }}</span></td>
+                <td><span [class]="item.is_active ? 'badge-active' : 'badge-inactive'">{{ item.is_active ? 'Active' : 'Inactive' }}</span></td>
+                <td class="muted-text">{{ formatDate(item.created_at) }}</td>
+                <td class="action-cell">
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" type="button" (click)="openEdit(item)">Edit</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" (click)="toggleActive(item)">{{ item.is_active ? 'Deactivate' : 'Activate' }}</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (drawerOpen()) {
+  <div class="vs-drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside class="vs-drawer open">
+    <div class="drawer-header d-flex align-items-center justify-content-between">
+      <h3 class="table-card__title">{{ editing() ? 'Edit Category' : 'Add Category' }}</h3>
+      <button class="btn-close" type="button" aria-label="Close" (click)="closeDrawer()"></button>
+    </div>
+    <form class="drawer-body" [formGroup]="form" (ngSubmit)="save()">
+      @if (actionError()) { <div class="alert alert-danger">{{ actionError() }}</div> }
+      <label class="form-label" for="category-name">Category name</label>
+      <input id="category-name" class="form-control" formControlName="category_name" placeholder="Mountain Bikes" />
+      @if (form.controls.category_name.invalid && form.controls.category_name.touched) {
+        <div class="invalid-feedback d-block">Category name is required.</div>
+      }
+    </form>
+    <div class="drawer-footer d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="closeDrawer()">Cancel</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+        Save
+      </button>
+    </div>
+  </aside>
+}

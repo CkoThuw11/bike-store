@@ -1,0 +1,55 @@
+<div class="settings-page">
+  <div class="settings-card card shadow-sm">
+    <div class="card-body">
+      @if (user(); as u) {
+        <div class="settings-card__head">
+          <div class="settings-card__avatar">{{ initials() }}</div>
+          <div>
+            <h2 class="settings-card__name">{{ u.fullname }}</h2>
+            <p class="settings-card__email">{{ u.email }}</p>
+          </div>
+          <span class="settings-card__badge">{{ u.role }}</span>
+        </div>
+
+        <hr />
+
+        <dl class="settings-card__details">
+          <div>
+            <dt>Username</dt>
+            <dd>{{ u.username }}</dd>
+          </div>
+          <div>
+            <dt>User ID</dt>
+            <dd>#{{ u.user_id }}</dd>
+          </div>
+          <div>
+            <dt>Account status</dt>
+            <dd>{{ u.is_active ? 'Active' : 'Inactive' }}</dd>
+          </div>
+          <div>
+            <dt>Member since</dt>
+            <dd>{{ u.created_at.slice(0, 10) }}</dd>
+          </div>
+        </dl>
+
+        <hr />
+
+        <div class="settings-card__danger">
+          <div>
+            <p class="settings-card__danger-title">Sign out</p>
+            <p class="settings-card__danger-meta">You'll need to sign in again to access the console.</p>
+          </div>
+          @if (!confirming()) {
+            <button type="button" class="btn btn-outline-danger" (click)="startLogout()">Sign out</button>
+          } @else {
+            <div class="d-flex gap-2 align-items-center">
+              <span class="small text-muted">Are you sure?</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cancelLogout()">Cancel</button>
+              <button type="button" class="btn btn-sm btn-danger" (click)="confirmLogout()">Confirm sign out</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

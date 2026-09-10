@@ -1,0 +1,143 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Staff</h2>
+      <p class="page-subtitle">Manage employee assignments, store coverage, and reporting lines.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">Add Staff</button>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <input class="form-control" type="search" placeholder="Search staff" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <select class="form-select" [ngModel]="storeFilter()" (ngModelChange)="storeFilter.set($event)">
+          <option value="all">All stores</option>
+          @for (store of stores(); track store.store_id) {
+            <option [value]="store.store_id">{{ store.store_name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-lg-auto ms-lg-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCsv()">Export CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) { <div class="error-state mb-3">{{ error() }}</div> }
+  @if (feedback(); as modal) {
+    <div class="vs-drawer-backdrop" (click)="closeFeedback()"></div>
+    <div class="feedback-modal" role="dialog" aria-modal="true">
+      <div [class]="'feedback-icon feedback-icon--' + modal.kind"></div>
+      <h3>{{ modal.title }}</h3>
+      <p>{{ modal.message }}</p>
+      <button class="btn btn-primary" type="button" (click)="closeFeedback()">OK</button>
+    </div>
+  }
+
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">{{ filtered().length }} staff members</h3>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-border text-primary"></div><span>Loading staff...</span></div>
+    } @else if (filtered().length === 0) {
+      <div class="empty-state"><strong>No staff found</strong><span>Adjust filters or add a staff member.</span></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover vs-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Store</th>
+              <th>Manager</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th class="action-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (staff of filtered(); track staff.staff_id) {
+              <tr>
+                <td><span class="entity-name">#{{ staff.staff_id }}</span></td>
+                <td><span class="entity-name">{{ staff.first_name }} {{ staff.last_name }}</span><div class="muted-text">{{ staff.phone }}</div></td>
+                <td>{{ storeName(staff.store_id) }}</td>
+                <td>{{ managerName(staff.manager_id) }}</td>
+                <td>{{ staff.email }}</td>
+                <td><span [class]="staff.is_active ? 'badge-active' : 'badge-inactive'">{{ staff.is_active ? 'Active' : 'Inactive' }}</span></td>
+                <td class="action-cell">
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" type="button" (click)="openEdit(staff)">Edit</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" (click)="toggleActive(staff)">{{ staff.is_active ? 'Deactivate' : 'Activate' }}</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (drawerOpen()) {
+  <div class="vs-drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside class="vs-drawer open">
+    <div class="drawer-header d-flex align-items-center justify-content-between">
+      <h3 class="table-card__title">{{ editing() ? 'Edit Staff' : 'Add Staff' }}</h3>
+      <button class="btn-close" type="button" aria-label="Close" (click)="closeDrawer()"></button>
+    </div>
+    <form class="drawer-body" [formGroup]="form" (ngSubmit)="save()">
+      @if (actionError()) { <div class="alert alert-danger">{{ actionError() }}</div> }
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label" for="first-name">First name</label>
+          <input id="first-name" class="form-control" formControlName="first_name" />
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="last-name">Last name</label>
+          <input id="last-name" class="form-control" formControlName="last_name" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="staff-email">Email</label>
+        <input id="staff-email" class="form-control" type="email" formControlName="email" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="staff-phone">Phone</label>
+        <input id="staff-phone" class="form-control" formControlName="phone" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="staff-store">Store</label>
+        <select id="staff-store" class="form-select" formControlName="store_id">
+          @for (store of stores(); track store.store_id) {
+            <option [ngValue]="store.store_id">{{ store.store_name }}</option>
+          }
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="staff-manager">Manager</label>
+        <select id="staff-manager" class="form-select" formControlName="manager_id">
+          <option [ngValue]="null">No manager</option>
+          @for (manager of staffs(); track manager.staff_id) {
+            @if (manager.staff_id !== editing()?.staff_id) {
+              <option [ngValue]="manager.staff_id">{{ manager.first_name }} {{ manager.last_name }}</option>
+            }
+          }
+        </select>
+      </div>
+    </form>
+    <div class="drawer-footer d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="closeDrawer()">Cancel</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+        Save
+      </button>
+    </div>
+  </aside>
+}

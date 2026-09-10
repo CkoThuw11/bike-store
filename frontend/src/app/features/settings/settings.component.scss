@@ -1,0 +1,72 @@
+.settings-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.settings-card {
+  border-radius: var(--radius, 12px);
+  border: 1px solid var(--border-light);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+  }
+
+  &__name {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  &__email { margin: 0; color: var(--text-muted); font-size: 0.88rem; }
+
+  &__badge {
+    margin-left: auto;
+    background: rgba(255, 107, 53, 0.12);
+    color: var(--primary-dark);
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  &__details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1.25rem;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+
+    dt { color: var(--text-muted); font-size: 0.78rem; font-weight: 500; margin-bottom: 2px; }
+    dd { color: var(--text-primary); font-size: 0.92rem; font-weight: 500; margin: 0; }
+  }
+
+  &__danger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__danger-title { font-weight: 600; margin: 0; color: var(--text-primary); }
+  &__danger-meta  { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
+}

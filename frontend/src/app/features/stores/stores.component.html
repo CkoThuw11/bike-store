@@ -1,0 +1,113 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Stores</h2>
+      <p class="page-subtitle">Manage selling locations, contact details, and service coverage.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">Add Store</button>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-6">
+        <input class="form-control" type="search" placeholder="Search stores" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+      </div>
+      <div class="col-12 col-md-auto ms-md-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCsv()">Export CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) { <div class="error-state mb-3">{{ error() }}</div> }
+  @if (feedback(); as modal) {
+    <div class="vs-drawer-backdrop modal-backdrop-soft" (click)="closeFeedback()"></div>
+    <div class="feedback-modal" role="dialog" aria-modal="true">
+      <div [class]="'feedback-icon feedback-icon--' + modal.kind"></div>
+      <h3>{{ modal.title }}</h3>
+      <p>{{ modal.message }}</p>
+      <button class="btn btn-primary" type="button" (click)="closeFeedback()">OK</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="metric-grid">
+      @for (i of [1,2,3,4,5,6]; track i) { <div class="skeleton"></div> }
+    </div>
+  } @else if (filtered().length === 0) {
+    <div class="table-card empty-state"><strong>No stores found</strong><span>Adjust search or add a new location.</span></div>
+  } @else {
+    <div class="store-grid">
+      @for (store of filtered(); track store.store_id) {
+        <article class="store-card">
+          <div class="p-4">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+              <div>
+                <h3 class="table-card__title">{{ store.store_name }}</h3>
+                <p class="page-subtitle">#{{ store.store_id }} · {{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
+              </div>
+              <span [class]="isStoreActive(store) ? 'badge-active' : 'badge-inactive'">{{ isStoreActive(store) ? 'Active' : 'Inactive' }}</span>
+            </div>
+            <p class="mb-2">{{ store.street }}</p>
+            <p class="muted-text mb-1">{{ store.email }}</p>
+            <p class="muted-text mb-0">{{ store.phone || 'No phone listed' }}</p>
+          </div>
+          <div class="p-3 d-flex gap-2" style="border-top: 1px solid var(--border-light)">
+            <button class="btn btn-outline-primary btn-sm" type="button" (click)="openEdit(store)">Edit</button>
+            <button class="btn btn-outline-secondary btn-sm" type="button" (click)="toggleActive(store)">{{ isStoreActive(store) ? 'Deactivate' : 'Activate' }}</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (drawerOpen()) {
+  <div class="vs-drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside class="vs-drawer open">
+    <div class="drawer-header d-flex align-items-center justify-content-between">
+      <h3 class="table-card__title">{{ editing() ? 'Edit Store' : 'Add Store' }}</h3>
+      <button class="btn-close" type="button" aria-label="Close" (click)="closeDrawer()"></button>
+    </div>
+    <form class="drawer-body" [formGroup]="form" (ngSubmit)="save()">
+      @if (actionError()) { <div class="alert alert-danger">{{ actionError() }}</div> }
+      <div class="mb-3">
+        <label class="form-label" for="store-name">Store name</label>
+        <input id="store-name" class="form-control" formControlName="store_name" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="store-email">Email</label>
+        <input id="store-email" class="form-control" type="email" formControlName="email" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="store-phone">Phone</label>
+        <input id="store-phone" class="form-control" formControlName="phone" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="store-street">Street</label>
+        <input id="store-street" class="form-control" formControlName="street" />
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="form-label" for="store-city">City</label>
+          <input id="store-city" class="form-control" formControlName="city" />
+        </div>
+        <div class="col-3">
+          <label class="form-label" for="store-state">State</label>
+          <input id="store-state" class="form-control" formControlName="state" />
+        </div>
+        <div class="col-3">
+          <label class="form-label" for="store-zip">ZIP</label>
+          <input id="store-zip" class="form-control" formControlName="zip_code" />
+        </div>
+      </div>
+    </form>
+    <div class="drawer-footer d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="closeDrawer()">Cancel</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+        Save
+      </button>
+    </div>
+  </aside>
+}

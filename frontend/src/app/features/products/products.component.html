@@ -1,0 +1,211 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Products</h2>
+      <p class="page-subtitle">Maintain bike models, pricing, brand, and category assignments.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">Add Product</button>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="row g-3">
+      <div class="col-12 col-lg-5">
+        <input class="form-control" type="search" placeholder="Search products" [ngModel]="query()" (ngModelChange)="setQuery($event)" />
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <select class="form-select" [ngModel]="brandFilter()" (ngModelChange)="setBrandFilter($event)">
+          <option value="all">All brands</option>
+          @for (brand of brands(); track brand.brand_id) {
+            <option [value]="brand.brand_id">{{ brand.brand_name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <select class="form-select" [ngModel]="categoryFilter()" (ngModelChange)="setCategoryFilter($event)">
+          <option value="all">All categories</option>
+          @for (category of categories(); track category.category_id) {
+            <option [value]="category.category_id">{{ category.category_name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-lg-auto ms-lg-auto d-flex gap-2">
+        @if (hasActiveFilters()) {
+          <button class="btn btn-link btn-sm" type="button" (click)="clearFilters()">Clear filters</button>
+        }
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCsv()" aria-label="Export current view as CSV">
+          Export CSV
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) { <div class="error-state mb-3">{{ error() }}</div> }
+  @if (feedback(); as modal) {
+    <div class="vs-drawer-backdrop modal-backdrop-soft" (click)="closeFeedback()"></div>
+    <div class="feedback-modal" role="dialog" aria-modal="true">
+      <div [class]="'feedback-icon feedback-icon--' + modal.kind"></div>
+      <h3>{{ modal.title }}</h3>
+      <p>{{ modal.message }}</p>
+      <button class="btn btn-primary" type="button" (click)="closeFeedback()">OK</button>
+    </div>
+  }
+
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">{{ filtered().length }} products</h3>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-border text-primary"></div><span>Loading products...</span></div>
+    } @else if (filtered().length === 0) {
+      @if (hasActiveFilters()) {
+        <div class="empty-state">
+          <strong>No products match your filters</strong>
+          <button class="btn btn-link btn-sm" type="button" (click)="clearFilters()">Clear filters</button>
+        </div>
+      } @else {
+        <div class="empty-state">
+          <strong>No products yet</strong>
+          <span>Get started by adding your first product.</span>
+          <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()">Add Product</button>
+        </div>
+      }
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover vs-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product</th>
+              <th>Brand</th>
+              <th>Category</th>
+              <th>Year</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th class="action-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of paginated(); track item.product_id) {
+              <tr>
+                <td><span class="entity-name">#{{ item.product_id }}</span></td>
+                <td><span class="entity-name">{{ item.product_name }}</span></td>
+                <td>{{ brandName(item.brand_id) }}</td>
+                <td>{{ categoryName(item.category_id) }}</td>
+                <td>{{ item.model_year }}</td>
+                <td class="entity-name">{{ formatPrice(item.list_price) }}</td>
+                <td><span [class]="item.is_active ? 'badge-active' : 'badge-inactive'">{{ item.is_active ? 'Active' : 'Inactive' }}</span></td>
+                <td class="action-cell">
+                  <div class="entity-actions">
+                    <button class="btn btn-outline-primary btn-sm" type="button" (click)="openEdit(item)">Edit</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" (click)="toggleActive(item)">{{ item.is_active ? 'Deactivate' : 'Activate' }}</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (filtered().length > pageSize) {
+        <div class="pagination-footer">
+          <div class="pagination-summary">Showing {{ pageStart() }}-{{ pageEnd() }} of {{ filtered().length }}</div>
+          <nav aria-label="Products pagination">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" type="button" [disabled]="currentPage() === 1" (click)="goToPage(1)">First</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" type="button" [disabled]="currentPage() === 1" (click)="previousPage()">Previous</button>
+              </li>
+              @for (page of visiblePages(); track page) {
+                <li class="page-item" [class.active]="page === currentPage()">
+                  <button class="page-link" type="button" (click)="goToPage(page)">{{ page }}</button>
+                </li>
+              }
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" type="button" [disabled]="currentPage() === totalPages()" (click)="nextPage()">Next</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" type="button" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())">Last</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      }
+    }
+  </div>
+</section>
+
+@if (drawerOpen()) {
+  <div class="vs-drawer-backdrop" (click)="requestDrawerClose()"></div>
+  <aside
+    class="vs-drawer open"
+    appDrawerKeys
+    [active]="drawerOpen() && !confirmDiscard()"
+    (closeRequested)="requestDrawerClose()"
+    (submitRequested)="save()"
+  >
+    <div class="drawer-header d-flex align-items-center justify-content-between">
+      <h3 class="table-card__title">{{ editing() ? 'Edit Product' : 'Add Product' }}</h3>
+      <button class="btn-close" type="button" aria-label="Close" (click)="requestDrawerClose()"></button>
+    </div>
+
+    <form class="drawer-body" [formGroup]="form" (ngSubmit)="save()">
+      @if (actionError()) { <div class="alert alert-danger">{{ actionError() }}</div> }
+
+      <div class="mb-3">
+        <label class="form-label" for="product-name">Product name</label>
+        <input id="product-name" class="form-control" formControlName="product_name" placeholder="Trail Bike 1" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="brand">Brand</label>
+        <select id="brand" class="form-select" formControlName="brand_id">
+          @for (brand of brands(); track brand.brand_id) {
+            <option [ngValue]="brand.brand_id">{{ brand.brand_name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="category">Category</label>
+        <select id="category" class="form-select" formControlName="category_id">
+          @for (category of categories(); track category.category_id) {
+            <option [ngValue]="category.category_id">{{ category.category_name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="form-label" for="model-year">Model year</label>
+          <input id="model-year" class="form-control" type="number" formControlName="model_year" />
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="list-price">List price</label>
+          <input id="list-price" class="form-control" inputmode="decimal" formControlName="list_price" placeholder="999.99" />
+        </div>
+      </div>
+    </form>
+
+    <div class="drawer-footer d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="requestDrawerClose()">Cancel</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+        Save
+      </button>
+    </div>
+  </aside>
+}
+
+<app-confirm-dialog
+  [open]="confirmDiscard()"
+  title="Discard unsaved changes?"
+  message="Your changes to this product haven't been saved."
+  confirmLabel="Discard"
+  cancelLabel="Keep editing"
+  tone="danger"
+  (confirmed)="confirmDiscardClose()"
+  (cancelled)="cancelDiscard()"
+/>

@@ -1,0 +1,159 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Create Order</h2>
+      <p class="page-subtitle">Select a customer, build the cart, and checkout against inventory.</p>
+    </div>
+    <a routerLink="/orders" class="btn btn-outline-secondary">Back to Orders</a>
+  </div>
+
+  @if (error()) { <div class="error-state mb-3">{{ error() }}</div> }
+  @if (success()) { <div class="alert alert-success">{{ success() }}</div> }
+
+  <div class="table-card mb-4">
+    <div class="p-4">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="entity-name">Step {{ step() }} of 3</span>
+        <span class="muted-text">
+          @if (step() === 1) { Select customer }
+          @if (step() === 2) { Add items }
+          @if (step() === 3) { Checkout }
+        </span>
+      </div>
+      <div class="progress" style="height: 0.55rem;">
+        <div class="progress-bar" [style.width.%]="progress()"></div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state table-card"><div class="spinner-border text-primary"></div><span>Loading order data...</span></div>
+  } @else {
+    <div class="order-layout">
+      <div class="order-workspace">
+        @if (step() === 1) {
+          <div class="toolbar-card">
+            <input class="form-control" type="search" placeholder="Search customers by ID, name, email, or city" [ngModel]="customerQuery()" (ngModelChange)="customerQuery.set($event)" />
+          </div>
+          <div class="store-grid">
+            @for (customer of filteredCustomers(); track customer.customer_id) {
+              <button class="customer-card text-start" type="button" [class.customer-card--selected]="selectedCustomer()?.customer_id === customer.customer_id" (click)="selectCustomer(customer)">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="table-card__title">#{{ customer.customer_id }} {{ customer.first_name }} {{ customer.last_name }}</h3>
+                    <p class="page-subtitle">{{ customer.email }}</p>
+                  </div>
+                  @if (selectedCustomer()?.customer_id === customer.customer_id) {
+                    <span class="badge-active">Selected</span>
+                  }
+                </div>
+                <p class="muted-text mb-0 mt-3">{{ customer.city }}, {{ customer.state }}</p>
+              </button>
+            }
+          </div>
+        }
+
+        @if (step() === 2) {
+          <div class="table-card p-4 mb-3">
+            <div class="row g-3 align-items-end">
+              <div class="col-12">
+                <label class="form-label" for="product-search">Search product</label>
+                <input id="product-search" class="form-control" type="search" placeholder="Search products by ID or name" [ngModel]="productQuery()" (ngModelChange)="setProductQuery($event)" />
+              </div>
+              @if (filteredProducts().length === 0) {
+                <div class="col-12">
+                  <div class="empty-state empty-state--compact">
+                    <strong>No products available</strong>
+                    <span>Clear the product search or activate a product before creating an order.</span>
+                  </div>
+                </div>
+              } @else {
+                <div class="col-12 col-lg-6">
+                  <label class="form-label" for="product">Product</label>
+                  <select id="product" class="form-select" [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)">
+                    @for (product of filteredProducts(); track product.product_id) {
+                      <option [ngValue]="product.product_id">#{{ product.product_id }} {{ product.product_name }} - {{ formatPrice(product.list_price) }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                  <label class="form-label" for="qty">Qty</label>
+                  <input id="qty" class="form-control" type="number" min="1" [ngModel]="quantity()" (ngModelChange)="quantity.set($event)" />
+                </div>
+                <div class="col-6 col-lg-2">
+                  <label class="form-label" for="discount">Discount %</label>
+                  <input id="discount" class="form-control" type="number" min="0" max="100" [ngModel]="discountPercent()" (ngModelChange)="discountPercent.set($event)" />
+                </div>
+                <div class="col-12 col-lg-2">
+                  <button class="btn btn-primary w-100" type="button" [disabled]="!selectedProductId()" (click)="addItem()">Add Item</button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="table-card">
+            @if (items().length === 0) {
+              <div class="empty-state"><strong>No items added</strong><span>Add at least one item before checkout.</span></div>
+            } @else {
+              <table class="table vs-table">
+                <thead><tr><th>Product</th><th>Qty</th><th>Discount</th><th>Line</th><th></th></tr></thead>
+                <tbody>
+                  @for (item of items(); track $index) {
+                    <tr>
+                      <td><span class="entity-name">{{ item.product.product_name }}</span><div class="muted-text">{{ formatPrice(item.product.list_price) }} each</div></td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.discountPercent }}%</td>
+                      <td class="entity-name">{{ formatLine(item) }}</td>
+                      <td class="action-cell"><button class="btn btn-danger btn-sm" type="button" (click)="removeItem($index)">Remove</button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        }
+
+        @if (step() === 3) {
+          <div class="table-card p-4">
+            <label class="form-label" for="required-date">Required date</label>
+            <input id="required-date" class="form-control mb-4" type="date" [ngModel]="requiredDate()" (ngModelChange)="requiredDate.set($event)" />
+            <button class="btn btn-primary w-100" type="button" [disabled]="saving()" (click)="placeOrder()">
+              @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+              Confirm & Place Order
+            </button>
+          </div>
+        }
+
+        <div class="d-flex justify-content-between mt-4">
+          <button class="btn btn-outline-secondary" type="button" [disabled]="step() === 1 || saving()" (click)="back()">Back</button>
+          @if (step() < 3) {
+            <button class="btn btn-primary" type="button" [disabled]="(step() === 1 && !selectedCustomer()) || (step() === 2 && items().length === 0)" (click)="next()">Continue</button>
+          }
+        </div>
+      </div>
+
+      <aside class="summary-card">
+        <h3 class="table-card__title mb-3">Summary</h3>
+        <div class="summary-row">
+          <span>Customer</span>
+          <strong>{{ selectedCustomer() ? selectedCustomer()?.first_name + ' ' + selectedCustomer()?.last_name : 'Not selected' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Items</span>
+          <strong>{{ items().length }}</strong>
+        </div>
+        <hr />
+        @for (item of items(); track $index) {
+          <div class="summary-line">
+            <span>{{ item.product.product_name }}</span>
+            <strong>{{ formatLine(item) }}</strong>
+          </div>
+        }
+        <div class="summary-total">
+          <span>Total</span>
+          <strong>{{ formatPrice(total()) }}</strong>
+        </div>
+      </aside>
+    </div>
+  }
+</section>
