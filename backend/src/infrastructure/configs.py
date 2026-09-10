@@ -47,8 +47,8 @@ class AppSettings(BaseSettings):
 class Settings(BaseSettings):
     model_config = _ENV_FILE_CONFIG
 
-    database: DatabaseSettings = Field(default_factory=DatabaseSettings)
-    auth: AuthSettings = Field(default_factory=AuthSettings)
+    database: DatabaseSettings = Field(default_factory=lambda: DatabaseSettings())
+    auth: AuthSettings = Field(default_factory=lambda: AuthSettings())
     app: AppSettings = Field(default_factory=AppSettings)
 
 

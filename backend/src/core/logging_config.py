@@ -2,6 +2,7 @@
 import logging
 import sys
 import time
+from typing import Any
 
 import structlog
 
@@ -20,6 +21,7 @@ def setup_logging(log_level: str = "INFO", log_format: str = "text") -> None:
     logging.Formatter.converter = time.gmtime
 
     handler = logging.StreamHandler(sys.stdout)
+    formatter: logging.Formatter
     if log_format == "json":
         from pythonjsonlogger import jsonlogger
 
@@ -51,7 +53,7 @@ def setup_logging(log_level: str = "INFO", log_format: str = "text") -> None:
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     # 2. Configure structlog natively to bypass standard logging for application logs
-    processors = [
+    processors: list[Any] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),

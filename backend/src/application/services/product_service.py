@@ -229,7 +229,8 @@ class ProductService:
             )
 
         for stock in await self._stock_repo.get_stock_by_product_id(product_id):
-            await self._stock_repo.delete(stock.store_id, product_id)
+            if stock.store_id is not None:
+                await self._stock_repo.delete(stock.store_id, product_id)
 
         await self._product_repo.delete(product_id)
 

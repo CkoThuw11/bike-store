@@ -10,6 +10,20 @@ defaults:
   run:
     working-directory: backend
 
+env:
+  DATABASE_HOST: db
+  DATABASE_NAME: bike_store
+  DATABASE_USER: postgres
+  DATABASE_PASSWORD: postgres
+  DATABASE_PORT: "5432"
+  AUTH_SECRET_KEY: ci-test-secret-key
+  AUTH_ALGORITHM: HS256
+  AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: "15"
+  AUTH_REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  APP_DEBUG: "true"
+  LOG_LEVEL: INFO
+  LOG_FORMAT: text
+
 jobs:
   lint:
     name: Lint
